@@ -1,18 +1,17 @@
-import { Homepage } from "./components/Homepage.js";
-import { SignUp } from "./components/SignUp.js";
-import axios from "axios";
+import { Routes, Route, Navigate } from "react-router-dom";
+import { Homepage } from "./components/Homepage";
+import { SignUp } from "./components/SignUp";
+import { SignIn } from "./components/SignIn";
+
 function App() {
-  const apiCall = () => {
-    axios.get("http://localhost:8080").then((data) => {
-      console.log(data);
-    });
-  };
   return (
-    <div>
-      <SignUp></SignUp>
-      {/* <Homepage></Homepage> */}
-      {/* <button onClick={apiCall}>make api call</button> */}
-    </div>
+    <Routes>
+      <Route path="/" element={<SignIn />} />
+      <Route path="/signup" element={<SignUp />} />
+      <Route path="/home" element={<Homepage />} />
+      {/* catch-all: send unknown hashes to / */}
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   );
 }
 

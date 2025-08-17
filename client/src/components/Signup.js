@@ -1,11 +1,11 @@
 import { useState } from "react";
 import axios from "axios";
-import { SignIn } from "./SignIn.js";
+import { useNavigate, Link } from "react-router-dom";
 
 export const SignUp = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [showSignIn, setShowSignIn] = useState(false);
+  const navigate = useNavigate();
 
   const submitHandler = (e) => {
     e.preventDefault();
@@ -18,12 +18,13 @@ export const SignUp = () => {
         console.log(data);
         setUsername("");
         setPassword("");
+        navigate("/");
+      })
+      .catch((err) => {
+        console.error(err);
+        alert(err.response?.data?.error || "Sign up failed");
       });
   };
-
-  if (showSignIn) {
-    return <SignIn />;
-  }
 
   return (
     <div>
@@ -64,13 +65,12 @@ export const SignUp = () => {
           <button type="submit" className="px-3 py-1 rounded-sm bg-aliceblue">
             Submit
           </button>
-          <button
-            type="button"
-            className="px-3 py-1 rounded-sm bg-aliceblue"
-            onClick={() => setShowSignIn(true)}
+          <Link
+            to="/"
+            className="px-3 py-1 rounded-sm bg-aliceblue inline-block"
           >
             Sign In
-          </button>
+          </Link>
         </div>
       </form>
     </div>

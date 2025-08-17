@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 
 export const NavigationBar = () => {
   const handleAddPost = () => {
@@ -11,13 +12,11 @@ export const NavigationBar = () => {
     alert("Searching: " + searchQuery);
   };
 
-  const handleProfileClick = () => {
-    alert("Profile button clicked!");
-  };
-
   return (
     <div className="flex items-center justify-between px-8 py-2">
-      <h1 className="animate-rgb large-text text-glow">BLOG</h1>
+      <Link to="/home" className="animate-rgb large-text text-glow">
+        BLOG
+      </Link>
       <div className="flex-grow px-8">
         <form
           onSubmit={handleSearch}
@@ -42,12 +41,9 @@ export const NavigationBar = () => {
         >
           +
         </button>
-        <button
-          className="large-text text-glow text-teagreen"
-          onClick={handleProfileClick}
-        >
+        <Link to="/home" className="large-text text-glow text-teagreen">
           Profile
-        </button>
+        </Link>
       </div>
     </div>
   );
