@@ -1,5 +1,5 @@
 import { Homepage } from "./components/Homepage.js";
-import { Signup } from "./components/Signup.js";
+import { SignUp } from "./components/SignUp.js";
 import axios from "axios";
 function App() {
   const apiCall = () => {
@@ -9,7 +9,7 @@ function App() {
   };
   return (
     <div>
-      <Signup></Signup>
+      <SignUp></SignUp>
       {/* <Homepage></Homepage> */}
       {/* <button onClick={apiCall}>make api call</button> */}
     </div>

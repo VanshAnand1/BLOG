@@ -1,16 +1,16 @@
 import { useState } from "react";
 import axios from "axios";
-import { SignIn } from "./SignIn.js";
+import { SignUp } from "./SignUp.js";
 
-export const SignUp = () => {
+export const SignIn = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [showSignIn, setShowSignIn] = useState(false);
+  const [showSignUp, setShowSignUp] = useState(false);
 
   const submitHandler = (e) => {
     e.preventDefault();
     axios
-      .post("http://localhost:8080/signup", {
+      .post("http://localhost:8080/signin", {
         username: username,
         password: password,
       })
@@ -21,8 +21,8 @@ export const SignUp = () => {
       });
   };
 
-  if (showSignIn) {
-    return <SignIn />;
+  if (showSignUp) {
+    return <SignUp />;
   }
 
   return (
@@ -32,7 +32,7 @@ export const SignUp = () => {
         className="mx-auto border-2 p-9 md:p-12 w-72 md:w-96 border-aliceblue mt-36 h-84"
       >
         <h1 className="pb-6 text-2xl text-center text-glow text-teagreen">
-          Sign Up
+          Sign In
         </h1>
         <label htmlFor="username" className="block mb-1 text-xl text-aliceblue">
           Username
@@ -67,9 +67,9 @@ export const SignUp = () => {
           <button
             type="button"
             className="px-3 py-1 rounded-sm bg-aliceblue"
-            onClick={() => setShowSignIn(true)}
+            onClick={() => setShowSignUp(true)}
           >
-            Sign In
+            Sign Up
           </button>
         </div>
       </form>
