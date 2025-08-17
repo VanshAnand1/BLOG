@@ -1,4 +1,5 @@
 import { Homepage } from "./components/Homepage.js";
+import { Signup } from "./components/Signup.js";
 import axios from "axios";
 function App() {
   const apiCall = () => {
@@ -8,8 +9,9 @@ function App() {
   };
   return (
     <div>
-      <Homepage></Homepage>
-      <button onClick={apiCall}>make api call</button>
+      <Signup></Signup>
+      {/* <Homepage></Homepage> */}
+      {/* <button onClick={apiCall}>make api call</button> */}
     </div>
   );
 }

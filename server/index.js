@@ -1,9 +1,16 @@
 require("dotenv").config();
+
 const express = require("express");
 const app = express();
+
 const cors = require("cors");
 app.use(cors());
+
 const mysql = require("mysql2/promise");
+
+const bodyParser = require("body-parser");
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
 
 const db = mysql.createPool({
   connectionLimit: 10,
@@ -14,14 +21,13 @@ const db = mysql.createPool({
   waitForConnections: true,
 });
 
-app.get("/", async (req, res) => {
-  // const username = req.body.username;
-  // const password = req.body.password;
+app.post("/signup", async (req, res) => {
+  const username = req.body.username;
+  const password = req.body.password;
   try {
     const [result] = await db.execute(
       "INSERT INTO users (username, password) VALUES (?, ?)",
-      // [username, password]
-      ["testing", "123"]
+      [username, password]
     );
     res.json({ insertedId: result.insertId });
   } catch (err) {
