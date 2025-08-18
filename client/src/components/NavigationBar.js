@@ -42,7 +42,7 @@ export const NavigationBar = () => {
         </form>
       </div>
       <div className="flex items-center gap-9">
-        <Link to="/home" className="large-text text-glow text-teagreen">
+        <Link to="/addpost" className="large-text text-glow text-teagreen">
           +
         </Link>
         <Link to="/profile" className="large-text text-glow text-teagreen">

@@ -3,6 +3,7 @@ import { Homepage } from "./components/Homepage";
 import { Profile } from "./components/Profile";
 import { SignUp } from "./components/SignUp";
 import { SignIn } from "./components/SignIn";
+import { AddPost } from "./components/AddPost";
 
 function App() {
   return (
@@ -11,6 +12,7 @@ function App() {
       <Route path="/signup" element={<SignUp />} />
       <Route path="/home" element={<Homepage />} />
       <Route path="/profile" element={<Profile />} />
+      <Route path="/addpost" element={<AddPost />} />
       <Route path="/logout" element={<SignIn />} />
       {/* catch-all: send unknown hashes to / */}
       <Route path="*" element={<Navigate to="/" replace />} />

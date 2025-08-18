@@ -143,8 +143,8 @@ function authRequired(req, res, next) {
   if (!token) return res.status(401).json({ error: "not authenticated" });
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded;
+    const payload = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = { user_id: payload.sub, username: payload.username };
     next();
   } catch (err) {
     return res.status(401).json({ error: "invalid or expired token" });
@@ -152,7 +152,7 @@ function authRequired(req, res, next) {
 }
 
 app.get("/me", authRequired, (req, res) => {
-  res.json({ user_id: req.user.sub, username: req.user.username });
+  res.json({ user_id: req.user.user_id, username: req.user.username });
 });
 
 app.post("/logout", (req, res) => {
@@ -162,6 +162,45 @@ app.post("/logout", (req, res) => {
     secure: process.env.NODE_ENV === "production",
   });
   res.json({ message: "Logged out" });
+});
+
+app.post("/addpost", authRequired, async (req, res) => {
+  try {
+    const { text } = req.body ?? {};
+    if (!text) {
+      return res.status(400).json({ error: "post information missing" });
+    }
+
+    const [result] = await db.execute(
+      "INSERT INTO posts (post_author, post, created_at) VALUES (?, ?, ?)",
+      [req.user.user_id, text, new Date()]
+    );
+
+    return res.status(201).json({ insertedId: result.insertId });
+  } catch (err) {
+    console.error("POST ERROR:", err);
+    return res.status(500).json({ error: "could not post" });
+  }
+});
+
+app.get("/posts", async (req, res) => {
+  try {
+    const [rows] = await db.execute(
+      `SELECT
+         p.post_id    AS id,
+         u.username   AS author,
+         p.post       AS text,
+         p.created_at AS createdAt
+       FROM posts p
+       JOIN users u ON u.user_id = p.post_author
+       ORDER BY p.created_at DESC
+       LIMIT 100`
+    );
+    res.json(rows);
+  } catch (err) {
+    console.error("GET POSTS ERROR:", err);
+    res.status(500).json({ error: "failed to fetch posts" });
+  }
 });
 
 app.listen(8080, () => {
