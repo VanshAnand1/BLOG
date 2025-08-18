@@ -203,6 +203,70 @@ app.get("/posts", async (req, res) => {
   }
 });
 
+app.get("/posts/:id", async (req, res) => {
+  const id = Number(req.params.id);
+  if (!Number.isFinite(id)) {
+    return res.status(400).json({ error: "Invalid post id" });
+  }
+
+  try {
+    const [[post]] = await db.execute(
+      `SELECT
+         p.post_id    AS id,
+         COALESCE(u.username, 'anonymous') AS author,
+         p.post       AS text,
+         p.created_at AS createdAt
+       FROM posts p
+       LEFT JOIN users u ON u.user_id = p.post_author
+       WHERE p.post_id = ?`,
+      [id]
+    );
+
+    if (!post) return res.status(404).json({ error: "Post not found" });
+
+    const [comments] = await db.execute(
+      `SELECT
+         c.comment_id AS id,
+         c.post       AS postId,
+         COALESCE(u.username, 'anonymous') AS author,
+         c.comment    AS text,
+         c.created_at AS createdAt
+       FROM comments c
+       LEFT JOIN users u ON u.user_id = c.comment_author
+       WHERE c.post = ?
+       ORDER BY c.created_at DESC`,
+      [id]
+    );
+
+    res.json({ post, comments });
+  } catch (err) {
+    console.error(
+      "GET /posts/:id ERROR:",
+      err?.sqlMessage || err?.message || err
+    );
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+app.post("/addcomment", authRequired, async (req, res) => {
+  try {
+    const { text, post_id } = req.body ?? {};
+    if (!text || !post_id) {
+      return res.status(400).json({ error: "comment information missing" });
+    }
+
+    const [result] = await db.execute(
+      "INSERT INTO comments (comment_author, post, created_at, comment) VALUES (?, ?, ?, ?)",
+      [req.user.user_id, post_id, new Date(), text]
+    );
+
+    return res.status(201).json({ insertedId: result.insertId });
+  } catch (err) {
+    console.error("POST ERROR:", err);
+    return res.status(500).json({ error: "could not post" });
+  }
+});
+
 app.listen(8080, () => {
   console.log("server listening on port 8080");
 });

@@ -4,6 +4,7 @@ import { Profile } from "./components/Profile";
 import { SignUp } from "./components/SignUp";
 import { SignIn } from "./components/SignIn";
 import { AddPost } from "./components/AddPost";
+import PostPage from "./components/PostPage";
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
       <Route path="/profile" element={<Profile />} />
       <Route path="/addpost" element={<AddPost />} />
       <Route path="/logout" element={<SignIn />} />
+      <Route path="/posts/:id" element={<PostPage />} />
       {/* catch-all: send unknown hashes to / */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
