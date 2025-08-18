@@ -157,9 +157,11 @@ app.get("/me", authRequired, (req, res) => {
 
 app.post("/logout", (req, res) => {
   res.clearCookie(process.env.COOKIE_NAME || "access", {
-    ...cookieOptions(0),
+    httpOnly: true,
+    sameSite: "strict",
+    secure: process.env.NODE_ENV === "production",
   });
-  res.json({ ok: true });
+  res.json({ message: "Logged out" });
 });
 
 app.listen(8080, () => {

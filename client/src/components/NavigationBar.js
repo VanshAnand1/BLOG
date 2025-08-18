@@ -1,11 +1,22 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
 
 export const NavigationBar = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const handleSearch = (event) => {
     event?.preventDefault();
     alert("Searching: " + searchQuery);
+  };
+
+  const navigate = useNavigate();
+  const handleLogout = async () => {
+    try {
+      await axios.post("/logout", {}, { withCredentials: true });
+      navigate("/signin");
+    } catch (err) {
+      console.error("Logout failed:", err);
+    }
   };
 
   return (
@@ -37,6 +48,12 @@ export const NavigationBar = () => {
         <Link to="/profile" className="large-text text-glow text-teagreen">
           Profile
         </Link>
+        <button
+          onClick={handleLogout}
+          className="large-text text-glow text-teagreen"
+        >
+          Logout
+        </button>
       </div>
     </div>
   );

@@ -11,6 +11,7 @@ function App() {
       <Route path="/signup" element={<SignUp />} />
       <Route path="/home" element={<Homepage />} />
       <Route path="/profile" element={<Profile />} />
+      <Route path="/logout" element={<SignIn />} />
       {/* catch-all: send unknown hashes to / */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
