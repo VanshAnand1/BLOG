@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { NavigationBar } from "./NavigationBar";
 
@@ -13,11 +13,71 @@ function formatWhen(when) {
   return isNaN(d) ? "" : d.toLocaleString();
 }
 
+function isInteractive(el) {
+  const tag = el?.tagName?.toLowerCase();
+  return (
+    tag === "input" ||
+    tag === "textarea" ||
+    tag === "button" ||
+    tag === "select" ||
+    el?.isContentEditable
+  );
+}
+
 export default function Profile() {
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [deletingId, setDeletingId] = useState(null);
+  const [editingId, setEditingId] = useState(null);
+  const [draft, setDraft] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  function startEdit(p) {
+    setEditingId(p.id);
+    setDraft(p.text || "");
+  }
+
+  function cancelEdit() {
+    setEditingId(null);
+    setDraft("");
+  }
+
+  async function saveEdit(id) {
+    if (!draft.trim()) return alert("Text is required");
+    setSaving(true);
+    try {
+      const { data: updated } = await axios.patch(
+        `/posts/${id}`,
+        { text: draft },
+        { withCredentials: true }
+      );
+      // optimistic replace in list
+      setPosts((prev) =>
+        prev.map((p) => (p.id === id ? { ...p, text: updated.text } : p))
+      );
+      cancelEdit();
+    } catch (err) {
+      alert(err?.response?.data?.error || "Update failed");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleDelete(id) {
+    if (!window.confirm("Delete this post? This cannot be undone.")) return;
+    setDeletingId(id);
+    try {
+      await axios.delete(`/posts/${id}`, { withCredentials: true });
+      setPosts((prev) => prev.filter((p) => p.id !== id)); // optimistic remove
+    } catch (err) {
+      alert(err?.response?.data?.error || "Delete failed");
+    } finally {
+      setDeletingId(null);
+    }
+  }
 
   useEffect(() => {
     let alive = true;
@@ -71,24 +131,96 @@ export default function Profile() {
           <ul className="space-y-4">
             {posts.map((p) => (
               <li key={p.id}>
-                <Link
-                  to={`/posts/${p.id}`}
-                  className="group block focus:outline-none"
+                <article
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => navigate(`/posts/${p.id}`)}
+                  onKeyDown={(e) => {
+                    if (e.target !== e.currentTarget && isInteractive(e.target))
+                      return;
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      navigate(`/posts/${p.id}`);
+                    }
+                  }}
+                  className="rounded-2xl border border-white/10 bg-white/5 p-5 shadow-sm cursor-pointer
+                   hover:-translate-y-[1px] hover:border-white/20 hover:shadow-md
+                   focus:outline-none focus-visible:ring-2 focus-visible:ring-teagreen/70"
                 >
-                  <article className="rounded-2xl border border-white/10 bg-white/5 p-5 shadow-sm transition hover:-translate-y-[1px] hover:border-white/20 hover:shadow-md focus-visible:ring-2 focus-visible:ring-teagreen/70">
-                    <header className="flex items-start justify-between gap-4 mb-2">
+                  <header className="flex items-start justify-between gap-4 mb-2">
+                    <div>
                       <h2 className="text-teagreen font-semibold">
                         {p.author}
                       </h2>
                       <time className="text-aliceblue/70 text-xs">
                         {formatWhen(p.createdAt)}
                       </time>
-                    </header>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          startEdit(p);
+                        }}
+                        className="text-xs px-2 py-1 rounded-md border border-white/10 text-aliceblue/90 hover:bg-white/10 transition"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDelete(p.id);
+                        }}
+                        disabled={deletingId === p.id}
+                        className="text-xs px-2 py-1 rounded-md border border-white/10 text-red-300 hover:bg-red-500/10 hover:text-red-200 transition disabled:opacity-60"
+                      >
+                        {deletingId === p.id ? "Deleting…" : "Delete"}
+                      </button>
+                    </div>
+                  </header>
+
+                  {editingId === p.id ? (
+                    <div className="space-y-3">
+                      <textarea
+                        value={draft}
+                        onChange={(e) => setDraft(e.target.value)}
+                        onClick={(e) => e.stopPropagation()}
+                        onKeyDown={(e) => e.stopPropagation()}
+                        className="w-full min-h-[140px] resize-y rounded-lg border border-white/10 bg-transparent px-3 py-2 text-aliceblue focus:outline-none focus:ring-1 focus:ring-teagreen"
+                      />
+                      <div className="flex justify-end gap-2">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            cancelEdit();
+                          }}
+                          className="px-3 py-1.5 rounded-md border border-white/10 text-aliceblue/90 hover:bg-white/10 transition"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            saveEdit(p.id);
+                          }}
+                          disabled={saving || !draft.trim()}
+                          className="px-3 py-1.5 rounded-md bg-teagreen/90 text-[#0b1321] font-medium hover:bg-teagreen transition disabled:opacity-60"
+                        >
+                          {saving ? "Saving…" : "Save"}
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
                     <p className="text-aliceblue/95 leading-relaxed whitespace-pre-wrap">
                       {p.text}
                     </p>
-                  </article>
-                </Link>
+                  )}
+                </article>
               </li>
             ))}
           </ul>

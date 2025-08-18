@@ -283,6 +283,79 @@ app.get("/me/posts", authRequired, async (req, res) => {
   }
 });
 
+app.delete("/posts/:id", authRequired, async (req, res) => {
+  const id = Number(req.params.id);
+  if (!Number.isFinite(id)) {
+    return res.status(400).json({ error: "Invalid post id" });
+  }
+
+  try {
+    // ensure the post exists and belongs to the requester
+    const [[row]] = await db.execute(
+      "SELECT post_author FROM posts WHERE post_id = ?",
+      [id]
+    );
+    if (!row) return res.status(404).json({ error: "Post not found" });
+    if (row.post_author !== req.user.user_id) {
+      return res.status(403).json({ error: "Forbidden" });
+    }
+
+    // // if you DON'T have FK cascade, delete comments first:
+    // await db.execute("DELETE FROM comments WHERE post = ?", [id]);
+
+    // delete the post
+    await db.execute("DELETE FROM posts WHERE post_id = ?", [id]);
+
+    res.json({ ok: true, deletedId: id });
+  } catch (err) {
+    console.error("DELETE /posts/:id ERROR:", err?.sqlMessage || err);
+    res.status(500).json({ error: "server error" });
+  }
+});
+
+app.patch("/posts/:id", authRequired, async (req, res) => {
+  const id = Number(req.params.id);
+  const { text } = req.body ?? {};
+  if (!Number.isFinite(id))
+    return res.status(400).json({ error: "Invalid post id" });
+  if (!text || !text.trim())
+    return res.status(400).json({ error: "Text is required" });
+
+  try {
+    // owner check
+    const [[row]] = await db.execute(
+      "SELECT post_author FROM posts WHERE post_id = ?",
+      [id]
+    );
+    if (!row) return res.status(404).json({ error: "Post not found" });
+    if (row.post_author !== req.user.user_id) {
+      return res.status(403).json({ error: "Forbidden" });
+    }
+
+    // update (keep it simple—no updated_at requirement)
+    await db.execute("UPDATE posts SET post = ? WHERE post_id = ?", [
+      text.trim(),
+      id,
+    ]);
+
+    // return the updated post
+    const [[updated]] = await db.execute(
+      `SELECT p.post_id AS id,
+              COALESCE(u.username,'anonymous') AS author,
+              p.post AS text,
+              p.created_at AS createdAt
+         FROM posts p
+         JOIN users u ON u.user_id = p.post_author
+        WHERE p.post_id = ?`,
+      [id]
+    );
+    res.json(updated);
+  } catch (err) {
+    console.error("PATCH /posts/:id ERROR:", err?.sqlMessage || err);
+    res.status(500).json({ error: "server error" });
+  }
+});
+
 app.listen(8080, () => {
   console.log("server listening on port 8080");
 });
