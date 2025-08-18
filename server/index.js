@@ -4,7 +4,22 @@ const express = require("express");
 const app = express();
 
 const cors = require("cors");
-app.use(cors());
+const allowedOrigins = process.env.ALLOWED_ORIGINS.split(",");
+
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      } else {
+        return callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
+  })
+);
 
 const mysql = require("mysql2/promise");
 
@@ -15,6 +30,32 @@ const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
+const cookieParser = require("cookie-parser");
+const jwt = require("jsonwebtoken");
+app.use(express.json());
+app.use(cookieParser());
+
+const COOKIE_NAME = process.env.COOKIE_NAME || "access";
+const isProd = process.env.NODE_ENV === "production";
+
+function cookieOptions(ms) {
+  return {
+    httpOnly: true,
+    sameSite: isProd ? "None" : "Lax",
+    secure: isProd,
+    maxAge: ms,
+    path: "/",
+  };
+}
+
+function signAccessToken(user) {
+  return jwt.sign(
+    { sub: user.user_id, username: user.username },
+    process.env.JWT_SECRET, // <- set this in your .env
+    { expiresIn: "15m" } // short-lived access token
+  );
+}
+
 app.use((req, _res, next) => {
   console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
   next();
@@ -22,10 +63,10 @@ app.use((req, _res, next) => {
 
 const db = mysql.createPool({
   connectionLimit: 10,
-  host: process.env.host,
-  user: process.env.user,
-  password: process.env.db_password,
-  database: process.env.database,
+  host: process.env.DATABASE_HOST,
+  user: process.env.DATABASE_USER,
+  password: process.env.DATABASE_PASSWORD,
+  database: process.env.DATABASE,
   waitForConnections: true,
 });
 
@@ -79,18 +120,45 @@ app.post("/signin", async (req, res) => {
       return res.status(401).json({ error: "invalid credentials" });
     }
 
-    return res.json({ id: user.id, username: user.username });
+    const token = signAccessToken(user);
+    res.cookie(COOKIE_NAME, token, cookieOptions(15 * 60 * 1000));
+
+    return res.json({ user_id: user.user_id, username: user.username });
   } catch (err) {
     console.error("SIGNIN ERROR:", err);
     return res.status(500).json({ error: "server error" });
   }
 });
 
-app.use((req, res) => {
-  console.warn("No route matched:", req.method, req.originalUrl);
-  res.status(404).json({ error: "Not found" });
+function authRequired(req, res, next) {
+  const token = req.cookies[process.env.COOKIE_NAME];
+  if (!token) return res.status(401).json({ error: "not authenticated" });
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = decoded;
+    next();
+  } catch (err) {
+    return res.status(401).json({ error: "invalid or expired token" });
+  }
+}
+
+app.get("/me", authRequired, (req, res) => {
+  res.json({ user_id: req.user.sub, username: req.user.username });
+});
+
+app.post("/logout", (req, res) => {
+  res.clearCookie(process.env.COOKIE_NAME || "access", {
+    ...cookieOptions(0),
+  });
+  res.json({ ok: true });
 });
 
 app.listen(8080, () => {
   console.log("server listening on port 8080");
+});
+
+app.use((req, res) => {
+  console.warn("No route matched:", req.method, req.originalUrl);
+  res.status(404).json({ error: "Not found" });
 });
