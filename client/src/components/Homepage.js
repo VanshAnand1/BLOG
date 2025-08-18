@@ -1,9 +1,9 @@
-import { NavigationBar } from "./NavigationBar";
+import { DisplayPosts } from "./DisplayPosts";
 
 export const Homepage = () => {
   return (
     <div>
-      <NavigationBar></NavigationBar>
+      <DisplayPosts></DisplayPosts>
     </div>
   );
 };
