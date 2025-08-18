@@ -9,11 +9,6 @@ const allowedOrigins = (process.env.ALLOWED_ORIGINS || "http://localhost:3000")
   .map((s) => s.trim())
   .filter(Boolean);
 
-// app.use((req, _res, next) => {
-//   if (req.headers.origin) console.log("Origin:", req.headers.origin);
-//   next();
-// });
-
 app.use(
   cors({
     origin(origin, callback) {
@@ -264,6 +259,27 @@ app.post("/addcomment", authRequired, async (req, res) => {
   } catch (err) {
     console.error("POST ERROR:", err);
     return res.status(500).json({ error: "could not post" });
+  }
+});
+
+app.get("/me/posts", authRequired, async (req, res) => {
+  try {
+    const [rows] = await db.execute(
+      `SELECT
+         p.post_id    AS id,
+         COALESCE(u.username, 'anonymous') AS author,
+         p.post       AS text,
+         p.created_at AS createdAt
+       FROM posts p
+       JOIN users u ON u.user_id = p.post_author
+       WHERE p.post_author = ?
+       ORDER BY p.created_at DESC`,
+      [req.user.user_id]
+    );
+    res.json(rows);
+  } catch (err) {
+    console.error("GET /me/posts ERROR:", err?.sqlMessage || err);
+    res.status(500).json({ error: "server error" });
   }
 });
 

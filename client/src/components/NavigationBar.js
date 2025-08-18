@@ -1,8 +1,21 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 
 export const NavigationBar = () => {
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    axios
+      .get("http://localhost:8080/me", { withCredentials: true })
+      .then((res) => {
+        setUser(res.data);
+      })
+      .catch((err) => {
+        console.error("Not signed in:", err);
+      });
+  }, []);
+
   const [searchQuery, setSearchQuery] = useState("");
   const handleSearch = (event) => {
     event?.preventDefault();
@@ -77,7 +90,7 @@ export const NavigationBar = () => {
             to="/profile"
             className="h-10 px-3 rounded-md inline-flex items-center text-white/90 hover:bg-white/10 hover:text-white transition"
           >
-            Profile
+            Profile: {user ? user.username.toUpperCase() : "not logged in :("}
           </Link>
           <button
             onClick={handleLogout}
