@@ -7,9 +7,9 @@ export const DisplayPosts = () => {
 
   useEffect(() => {
     axios
-      .get("/posts") // proxy-enabled or full URL if you prefer
+      .get("/posts")
       .then((res) => {
-        console.log("posts:", res.data); // 👈 verify you get data
+        console.log("posts:", res.data);
         setPosts(res.data);
       })
       .catch((err) => {
