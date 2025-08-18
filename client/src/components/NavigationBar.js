@@ -20,7 +20,7 @@ export const NavigationBar = () => {
   };
 
   return (
-    <div className="flex items-center justify-between px-8 py-2">
+    <div className="flex bg-zomp items-center justify-between px-8 py-2">
       <Link to="/home" className="animate-rgb large-text text-glow">
         BLOG
       </Link>

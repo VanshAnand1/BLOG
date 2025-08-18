@@ -10,21 +10,24 @@ export const SignUp = () => {
   const submitHandler = async (e) => {
     e.preventDefault();
     try {
+      await axios.post("/signup", { username, password });
+
       await axios.post(
         "/signin",
         { username, password },
         { withCredentials: true }
       );
 
-      const { data: me } = await axios.get("/me", { withCredentials: true });
-      console.log("Signed in as:", me.username);
-
       setUsername("");
       setPassword("");
       navigate("/home");
     } catch (err) {
-      console.error("signin error:", err.response?.status, err.response?.data);
-      alert(err.response?.data?.error || "Sign in failed");
+      console.error(
+        "signup/signin error:",
+        err.response?.status,
+        err.response?.data
+      );
+      alert(err.response?.data?.error || "Could not complete sign up");
     }
   };
 

@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { NavigationBar } from "./NavigationBar.js";
 
 export const Profile = () => {
   const [user, setUser] = useState(null);
@@ -17,12 +18,15 @@ export const Profile = () => {
   }, []);
 
   return (
-    <div className="flex items-center justify-between px-8 py-2">
-      <Link to="/home">
-        <h1 className="text-zomp large-text text-glow">
-          Hi {user ? user.username : "Guest"}
-        </h1>
-      </Link>
+    <div>
+      <NavigationBar></NavigationBar>
+      <div className="flex items-center justify-between px-8 py-2">
+        <Link to="/home">
+          <h1 className="text-zomp large-text text-glow">
+            Hi {user ? user.username : "Guest"}
+          </h1>
+        </Link>
+      </div>
     </div>
   );
 };
