@@ -182,14 +182,15 @@ app.get("/posts", async (req, res) => {
   try {
     const [rows] = await db.execute(
       `SELECT
-         p.post_id    AS id,
-         u.username   AS author,
-         p.post       AS text,
-         p.created_at AS createdAt
-       FROM posts p
-       JOIN users u ON u.user_id = p.post_author
-       ORDER BY p.created_at DESC
-       LIMIT 100`
+     p.post_id AS id,
+     u.username AS author,
+     p.post AS text,
+     DATE_FORMAT(p.created_at, '%Y-%m-%dT%H:%i:%s') AS createdAt,
+     DATE_FORMAT(p.updated_at, '%Y-%m-%dT%H:%i:%s') AS updatedAt
+   FROM posts p
+   JOIN users u ON u.user_id = p.post_author
+   ORDER BY COALESCE(p.updated_at, p.created_at) DESC
+   LIMIT 100`
     );
     res.json(rows);
   } catch (err) {
@@ -207,13 +208,14 @@ app.get("/posts/:id", async (req, res) => {
   try {
     const [[post]] = await db.execute(
       `SELECT
-         p.post_id    AS id,
-         COALESCE(u.username, 'anonymous') AS author,
-         p.post       AS text,
-         p.created_at AS createdAt
-       FROM posts p
-       LEFT JOIN users u ON u.user_id = p.post_author
-       WHERE p.post_id = ?`,
+     p.post_id AS id,
+     COALESCE(u.username, 'anonymous') AS author,
+     p.post AS text,
+     DATE_FORMAT(p.created_at, '%Y-%m-%dT%H:%i:%s') AS createdAt,
+     DATE_FORMAT(p.updated_at, '%Y-%m-%dT%H:%i:%s') AS updatedAt
+   FROM posts p
+   LEFT JOIN users u ON u.user_id = p.post_author
+   WHERE p.post_id = ?`,
       [id]
     );
 
@@ -266,14 +268,15 @@ app.get("/me/posts", authRequired, async (req, res) => {
   try {
     const [rows] = await db.execute(
       `SELECT
-         p.post_id    AS id,
-         COALESCE(u.username, 'anonymous') AS author,
-         p.post       AS text,
-         p.created_at AS createdAt
-       FROM posts p
-       JOIN users u ON u.user_id = p.post_author
-       WHERE p.post_author = ?
-       ORDER BY p.created_at DESC`,
+     p.post_id AS id,
+     COALESCE(u.username, 'anonymous') AS author,
+     p.post AS text,
+     DATE_FORMAT(p.created_at, '%Y-%m-%dT%H:%i:%s') AS createdAt,
+     DATE_FORMAT(p.updated_at, '%Y-%m-%dT%H:%i:%s') AS updatedAt
+   FROM posts p
+   JOIN users u ON u.user_id = p.post_author
+   WHERE p.post_author = ?
+   ORDER BY COALESCE(p.updated_at, p.created_at) DESC`,
       [req.user.user_id]
     );
     res.json(rows);
@@ -322,7 +325,6 @@ app.patch("/posts/:id", authRequired, async (req, res) => {
     return res.status(400).json({ error: "Text is required" });
 
   try {
-    // owner check
     const [[row]] = await db.execute(
       "SELECT post_author FROM posts WHERE post_id = ?",
       [id]
@@ -332,23 +334,23 @@ app.patch("/posts/:id", authRequired, async (req, res) => {
       return res.status(403).json({ error: "Forbidden" });
     }
 
-    // update (keep it simple—no updated_at requirement)
-    await db.execute("UPDATE posts SET post = ? WHERE post_id = ?", [
-      text.trim(),
-      id,
-    ]);
+    await db.execute(
+      "UPDATE posts SET post = ?, updated_at = NOW() WHERE post_id = ?",
+      [text.trim(), id]
+    );
 
-    // return the updated post
     const [[updated]] = await db.execute(
       `SELECT p.post_id AS id,
-              COALESCE(u.username,'anonymous') AS author,
-              p.post AS text,
-              p.created_at AS createdAt
-         FROM posts p
-         JOIN users u ON u.user_id = p.post_author
-        WHERE p.post_id = ?`,
+          COALESCE(u.username,'anonymous') AS author,
+          p.post AS text,
+          DATE_FORMAT(p.created_at, '%Y-%m-%dT%H:%i:%s') AS createdAt,
+          DATE_FORMAT(p.updated_at, '%Y-%m-%dT%H:%i:%s') AS updatedAt
+     FROM posts p
+     JOIN users u ON u.user_id = p.post_author
+    WHERE p.post_id = ?`,
       [id]
     );
+
     res.json(updated);
   } catch (err) {
     console.error("PATCH /posts/:id ERROR:", err?.sqlMessage || err);

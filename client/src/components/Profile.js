@@ -54,9 +54,12 @@ export default function Profile() {
         { text: draft },
         { withCredentials: true }
       );
-      // optimistic replace in list
       setPosts((prev) =>
-        prev.map((p) => (p.id === id ? { ...p, text: updated.text } : p))
+        prev.map((p) =>
+          p.id === id
+            ? { ...p, text: updated.text, updatedAt: updated.updatedAt }
+            : p
+        )
       );
       cancelEdit();
     } catch (err) {
@@ -154,6 +157,11 @@ export default function Profile() {
                       </h2>
                       <time className="text-aliceblue/70 text-xs">
                         {formatWhen(p.createdAt)}
+                        {p.updatedAt && p.updatedAt !== p.createdAt && (
+                          <span className="ml-2 text-white/50">
+                            (edited {formatWhen(p.updatedAt)})
+                          </span>
+                        )}
                       </time>
                     </div>
 

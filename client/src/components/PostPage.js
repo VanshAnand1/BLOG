@@ -81,7 +81,12 @@ export default function PostPage() {
                     {post.author}
                   </h2>
                   <time className="text-aliceblue/70 text-xs">
-                    {new Date(post.createdAt).toLocaleString()}
+                    {formatWhen(post.createdAt)}
+                    {post.updatedAt && post.updatedAt !== post.createdAt && (
+                      <span className="ml-2 text-white/50">
+                        (edited {formatWhen(post.updatedAt)})
+                      </span>
+                    )}
                   </time>
                 </div>
               </header>

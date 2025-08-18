@@ -56,8 +56,13 @@ export const DisplayPosts = () => {
                       <h2 className="text-teagreen font-semibold">
                         {p.author}
                       </h2>
-                      <time className="text-aliceblue/70 text-xs">
+                      <time className="text-aliceblue/70 text-sm">
                         {formatWhen(p.createdAt)}
+                        {p.updatedAt && p.updatedAt !== p.createdAt && (
+                          <span className="ml-2 text-white/50">
+                            (edited {formatWhen(p.updatedAt)})
+                          </span>
+                        )}
                       </time>
                     </header>
 
