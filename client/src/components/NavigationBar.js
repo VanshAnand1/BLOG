@@ -1,11 +1,7 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 
 export const NavigationBar = () => {
-  const handleAddPost = () => {
-    alert("You clicked the + button!");
-  };
-
   const [searchQuery, setSearchQuery] = useState("");
   const handleSearch = (event) => {
     event?.preventDefault();
@@ -35,13 +31,10 @@ export const NavigationBar = () => {
         </form>
       </div>
       <div className="flex items-center gap-9">
-        <button
-          className="large-text text-glow text-teagreen"
-          onClick={handleAddPost}
-        >
-          +
-        </button>
         <Link to="/home" className="large-text text-glow text-teagreen">
+          +
+        </Link>
+        <Link to="/profile" className="large-text text-glow text-teagreen">
           Profile
         </Link>
       </div>
