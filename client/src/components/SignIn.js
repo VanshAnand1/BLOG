@@ -10,7 +10,7 @@ export const SignIn = () => {
   const submitHandler = (e) => {
     e.preventDefault();
     axios
-      .post("http://localhost:8080/signin", {
+      .post("/signin", {
         username: username,
         password: password,
       })

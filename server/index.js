@@ -4,18 +4,26 @@ const express = require("express");
 const app = express();
 
 const cors = require("cors");
-const allowedOrigins = process.env.ALLOWED_ORIGINS.split(",");
+const allowedOrigins = (process.env.ALLOWED_ORIGINS || "http://localhost:3000")
+  .split(",")
+  .map((s) => s.trim())
+  .filter(Boolean);
+
+// app.use((req, _res, next) => {
+//   if (req.headers.origin) console.log("Origin:", req.headers.origin);
+//   next();
+// });
 
 app.use(
   cors({
-    origin: function (origin, callback) {
+    origin(origin, callback) {
       if (!origin) return callback(null, true);
 
       if (allowedOrigins.includes(origin)) {
         return callback(null, true);
-      } else {
-        return callback(new Error("Not allowed by CORS"));
       }
+
+      return callback(null, false);
     },
     credentials: true,
   })

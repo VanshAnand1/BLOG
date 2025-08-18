@@ -7,23 +7,25 @@ export const SignUp = () => {
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
-  const submitHandler = (e) => {
+  const submitHandler = async (e) => {
     e.preventDefault();
-    axios
-      .post("http://localhost:8080/signup", {
-        username: username,
-        password: password,
-      })
-      .then((data) => {
-        console.log(data);
-        setUsername("");
-        setPassword("");
-        navigate("/");
-      })
-      .catch((err) => {
-        console.error(err);
-        alert(err.response?.data?.error || "Sign up failed");
-      });
+    try {
+      await axios.post(
+        "/signin",
+        { username, password },
+        { withCredentials: true }
+      );
+
+      const { data: me } = await axios.get("/me", { withCredentials: true });
+      console.log("Signed in as:", me.username);
+
+      setUsername("");
+      setPassword("");
+      navigate("/home");
+    } catch (err) {
+      console.error("signin error:", err.response?.status, err.response?.data);
+      alert(err.response?.data?.error || "Sign in failed");
+    }
   };
 
   return (
