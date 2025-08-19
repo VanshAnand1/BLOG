@@ -1,11 +1,16 @@
 import { useState } from "react";
 import axios from "axios";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 
 export const SignIn = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const params = new URLSearchParams(location.search);
+  const rawFrom = params.get("from") || "/home";
+  const from = rawFrom.startsWith("/") ? rawFrom : "/home";
 
   const submitHandler = (e) => {
     e.preventDefault();
@@ -18,7 +23,7 @@ export const SignIn = () => {
         console.log(data);
         setUsername("");
         setPassword("");
-        navigate("/home");
+        navigate(from, { replace: true });
       })
       .catch((err) => {
         console.error(err);
