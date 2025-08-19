@@ -10,7 +10,7 @@ export const SignIn = () => {
 
   const params = new URLSearchParams(location.search);
   const rawFrom = params.get("from") || "/home";
-  const from = rawFrom.startsWith("/") ? rawFrom : "/home"; // safety
+  const from = rawFrom.startsWith("/") ? rawFrom : "/home";
 
   const submitHandler = (e) => {
     e.preventDefault();
