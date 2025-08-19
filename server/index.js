@@ -4,8 +4,7 @@ const express = require("express");
 const app = express();
 
 const cors = require("cors");
-const allowedOrigins = (process.env.ALLOWED_ORIGINS || "http://localhost:3000")
-  .split(",")
+const allowedOrigins = process.env.ALLOWED_ORIGINS.split(",")
   .map((s) => s.trim())
   .filter(Boolean);
 
