@@ -17,9 +17,10 @@ export const NavigationBar = () => {
   }, []);
 
   const [searchQuery, setSearchQuery] = useState("");
-  const handleSearch = (event) => {
-    event?.preventDefault();
-    alert("Searching: " + searchQuery);
+  const handleSearch = (e) => {
+    e.preventDefault();
+    const q = searchQuery.trim();
+    navigate(q ? `/search?q=${encodeURIComponent(q)}` : `/search`);
   };
 
   const navigate = useNavigate();
