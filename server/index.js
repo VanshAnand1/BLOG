@@ -177,6 +177,34 @@ app.post("/addpost", authRequired, async (req, res) => {
   }
 });
 
+app.get("/users/search", async (req, res) => {
+  const q = (req.query.q || "").trim();
+  if (!q) return res.json([]);
+  try {
+    const [rows] = await db.execute(
+      `SELECT
+         user_id AS id,
+         username,
+         (
+           (username COLLATE utf8mb4_general_ci = ?) * 100 +
+           (username COLLATE utf8mb4_general_ci LIKE CONCAT(?, '%')) * 90 +
+           (username COLLATE utf8mb4_general_ci LIKE CONCAT('%', ?, '%')) * 70 +
+           (SOUNDEX(username) = SOUNDEX(?)) * 50
+         ) AS score
+       FROM users
+       WHERE username COLLATE utf8mb4_general_ci LIKE CONCAT('%', ?, '%')
+          OR SOUNDEX(username) = SOUNDEX(?)
+       ORDER BY score DESC, username ASC
+       LIMIT 100`,
+      [q, q, q, q, q, q]
+    );
+    res.json(rows.map(({ id, username }) => ({ id, username })));
+  } catch (err) {
+    console.error("GET /users/search ERROR:", err?.sqlMessage || err);
+    res.status(500).json({ error: "server error" });
+  }
+});
+
 app.get("/posts", async (req, res) => {
   try {
     const [rows] = await db.execute(

@@ -88,14 +88,20 @@ export const NavigationBar = () => {
             <span className="hidden sm:inline">New</span>
           </Link>
           <Link
+            to="/profiles/search"
+            className="inline-flex items-center h-10 px-3 rounded-lg bg-teagreen/90 text-[#0b1321] font-medium hover:bg-teagreen transition"
+          >
+            User Search
+          </Link>
+          <Link
             to="/profile"
-            className="h-10 px-3 rounded-md inline-flex items-center text-white/90 hover:bg-white/10 hover:text-white transition"
+            className="inline-flex items-center h-10 px-3 rounded-lg bg-teagreen/90 text-[#0b1321] font-medium hover:bg-teagreen transition"
           >
             Profile: {user ? user.username.toUpperCase() : "not logged in :("}
           </Link>
           <button
             onClick={handleLogout}
-            className="h-10 px-3 rounded-md inline-flex items-center text-white/90 hover:bg-white/10 hover:text-white transition"
+            className="inline-flex items-center h-10 px-3 rounded-lg bg-periwinkle/60 text-[#0b1321] font-medium hover:bg-periwinkle transition"
           >
             Logout
           </button>

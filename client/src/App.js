@@ -8,6 +8,7 @@ import SearchResults from "./components/SearchResults";
 import PostPage from "./components/PostPage";
 import RequireAuth from "./RequireAuth";
 import UserProfile from "./components/UserProfile";
+import ProfileSearch from "./components/UserSearch";
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
       <Route path="/home" element={<Homepage />} />
       <Route path="/search" element={<SearchResults />} />
       <Route path="/u/:username" element={<UserProfile />} />
+      <Route path="/profiles/search" element={<ProfileSearch />} />
 
       <Route path="/signup" element={<SignUp />} />
       <Route path="/logout" element={<SignIn />} />
