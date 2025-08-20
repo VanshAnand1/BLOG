@@ -4,6 +4,7 @@ import Profile from "./components/Profile";
 import { SignUp } from "./components/SignUp";
 import { SignIn } from "./components/SignIn";
 import { AddPost } from "./components/AddPost";
+import SearchResults from "./components/SearchResults";
 import PostPage from "./components/PostPage";
 import RequireAuth from "./RequireAuth";
 
@@ -14,6 +15,7 @@ function App() {
       <Route path="/signin" element={<SignIn />} />
       <Route path="/" element={<SignIn />} />
       <Route path="/home" element={<Homepage />} />
+      <Route path="/search" element={<SearchResults />} />
 
       <Route path="/signup" element={<SignUp />} />
       <Route path="/logout" element={<SignIn />} />
