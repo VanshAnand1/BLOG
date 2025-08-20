@@ -66,7 +66,6 @@ export default function PostPage() {
       <NavigationBar />
 
       <div className="max-w-6xl mx-auto px-4 py-8">
-        {/* 2-col on desktop, 1-col on mobile */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* LEFT: Post + comments */}
           <section className="lg:col-span-2 space-y-6">

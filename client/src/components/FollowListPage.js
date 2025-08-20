@@ -97,7 +97,7 @@ export default function FollowListPage({ type }) {
         return n;
       });
       if (isSelf && type === "following") {
-        // remove from the list immediately if you're viewing "following"
+        // remove from the list immediately when viewing "following"
         setRows((prev) =>
           prev.filter((r) => r.username.toLowerCase() !== name.toLowerCase())
         );

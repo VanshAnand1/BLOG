@@ -37,7 +37,6 @@ export default function UserProfile() {
   const [following, setFollowing] = useState(false);
   const [busy, setBusy] = useState(false);
 
-  // edit/delete state
   const [editingId, setEditingId] = useState(null);
   const [draft, setDraft] = useState("");
   const [saving, setSaving] = useState(false);
@@ -104,7 +103,6 @@ export default function UserProfile() {
     }
   }
 
-  // edit/delete handlers
   function startEdit(p) {
     setEditingId(p.id);
     setDraft(p.text || "");

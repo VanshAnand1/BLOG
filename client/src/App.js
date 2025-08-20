@@ -37,7 +37,6 @@ function App() {
           path="/u/:username/followers"
           element={<FollowListPage type="followers" />}
         />
-        {/* any other private routes */}
       </Route>
 
       {/* fallback */}

@@ -22,6 +22,35 @@ router.get("/posts", async (_req, res) => {
   }
 });
 
+router.get("/followingposts", authRequired, async (req, res) => {
+  try {
+    const me = req.user.user_id;
+
+    const [rows] = await db.execute(
+      `SELECT
+         p.post_id AS id,
+         u.username AS author,
+         p.post     AS text,
+         DATE_FORMAT(p.created_at,'%Y-%m-%dT%H:%i:%s') AS createdAt,
+         DATE_FORMAT(p.updated_at,'%Y-%m-%dT%H:%i:%s') AS updatedAt
+       FROM posts p
+       JOIN users u ON u.user_id = p.post_author
+       LEFT JOIN friends f
+              ON f.friend = p.post_author
+             AND f.user   = ?
+       WHERE f.user IS NOT NULL OR p.post_author = ?
+       ORDER BY COALESCE(p.updated_at, p.created_at) DESC
+       LIMIT 100`,
+      [me, me]
+    );
+
+    res.json(rows);
+  } catch (err) {
+    console.error("GET /followingposts ERROR:", err?.sqlMessage || err);
+    res.status(500).json({ error: "failed to fetch posts" });
+  }
+});
+
 // Get one post + comments
 router.get("/posts/:id", async (req, res) => {
   const id = Number(req.params.id);
@@ -57,7 +86,7 @@ router.get("/posts/:id", async (req, res) => {
   }
 });
 
-// Create post (keeps your old path)
+// Create post
 router.post("/addpost", authRequired, async (req, res) => {
   try {
     const { text } = req.body ?? {};
@@ -156,7 +185,7 @@ router.patch("/posts/:id", authRequired, async (req, res) => {
   }
 });
 
-// Add comment (keeps your old path)
+// Add comment
 router.post("/addcomment", authRequired, async (req, res) => {
   try {
     const { text, post_id } = req.body ?? {};
