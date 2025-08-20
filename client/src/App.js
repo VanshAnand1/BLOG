@@ -15,15 +15,16 @@ function App() {
     <Routes>
       {/* public */}
       <Route path="/signin" element={<SignIn />} />
-      <Route path="/" element={<SignIn />} />
+      <Route path="/signup" element={<SignUp />} />
+
       <Route path="/home" element={<Homepage />} />
       <Route path="/search" element={<SearchResults />} />
       <Route path="/u/:username" element={<UserProfile />} />
       <Route path="/profiles/search" element={<ProfileSearch />} />
-
-      <Route path="/signup" element={<SignUp />} />
-      <Route path="/logout" element={<SignIn />} />
       <Route path="/posts/:id" element={<PostPage />} />
+
+      <Route path="/logout" element={<SignIn />} />
+      <Route path="/" element={<SignIn />} />
 
       {/* protected */}
       <Route element={<RequireAuth />}>
