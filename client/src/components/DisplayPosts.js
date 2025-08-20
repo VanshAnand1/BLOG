@@ -78,7 +78,7 @@ export const DisplayPosts = () => {
           <div className="text-aliceblue/80">Loading…</div>
         ) : err ? (
           <div className="rounded-2xl border border-red-500/30 bg-red-500/10 p-6 text-center text-red-200">
-            {err}
+            {err} - please sign in
             {feed === "following" && (
               <div className="mt-3">
                 <button
