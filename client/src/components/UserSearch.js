@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import { NavigationBar } from "./NavigationBar";
@@ -9,21 +9,37 @@ export default function UserSearch() {
   const [error, setError] = useState("");
   const [results, setResults] = useState([]);
 
-  const onSubmit = (e) => {
-    e.preventDefault();
+  useEffect(() => {
     const term = q.trim();
-    if (!term) {
-      setResults([]);
-      return;
-    }
+    // optional: don't search super short inputs
+    // if (term.length < 2) {
+    //   setResults([]);
+    //   setLoading(false);
+    //   return;
+    // }
+
     setLoading(true);
     setError("");
-    axios
-      .get("/users/search", { params: { q: term } })
-      .then((res) => setResults(Array.isArray(res.data) ? res.data : []))
-      .catch((e) => setError(e?.response?.data?.error || e.message))
-      .finally(() => setLoading(false));
-  };
+
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => {
+      axios
+        .get("/users/search", { params: { q: term }, signal: ctrl.signal })
+        .then((res) => setResults(Array.isArray(res.data) ? res.data : []))
+        .catch((err) => {
+          // ignore cancels
+          if (err?.name === "CanceledError" || err?.code === "ERR_CANCELED")
+            return;
+          setError(err?.response?.data?.error || err.message);
+        })
+        .finally(() => setLoading(false));
+    }, 300); // debounce ms
+
+    return () => {
+      clearTimeout(timer);
+      ctrl.abort();
+    };
+  }, [q]);
 
   return (
     <div className="min-h-screen">
@@ -34,25 +50,22 @@ export default function UserSearch() {
           <p className="text-aliceblue/80 text-sm">Search by username</p>
         </header>
 
-        <form onSubmit={onSubmit} className="w-full">
+        <form onSubmit={(e) => e.preventDefault()} className="w-full">
           <div className="flex w-full">
             <input
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="Search usernames…"
-              className="flex-1 h-10 rounded-l-xl bg-lightgray text-white placeholder-white/50
-                         px-3 border border-white/10 focus:outline-none focus:ring-2
-                         focus:ring-teagreen focus:border-transparent"
+              className="flex-1 h-10 rounded-l-xl bg-lightgray text-white placeholder-white/50 px-3 border border-white/10 focus:outline-none focus:ring-2 focus:ring-teagreen focus:border-transparent"
             />
             <button
-              type="submit"
+              type="button"
               className="h-10 px-4 rounded-r-xl bg-teagreen/90 text-[#0b1321] font-medium hover:bg-teagreen transition"
             >
               Search
             </button>
           </div>
         </form>
-
         {loading && <div className="text-aliceblue/80">Searching…</div>}
         {error && <div className="text-red-400">Error: {error}</div>}
 
