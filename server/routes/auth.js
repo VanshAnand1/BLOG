@@ -7,10 +7,11 @@ const {
   cookieOptions,
   COOKIE_NAME,
 } = require("../middleware/auth");
-
+const { rejectProfaneUsername } = require("../utils/profanity"); // <- only this
 const router = express.Router();
 
-router.post("/signup", async (req, res) => {
+router.post("/signup", rejectProfaneUsername(), async (req, res) => {
+  // <- add middleware
   try {
     const { username, password } = req.body ?? {};
     if (!username || !password) {
@@ -18,6 +19,7 @@ router.post("/signup", async (req, res) => {
         .status(400)
         .json({ error: "username and password are required" });
     }
+
     const hashed = await bcrypt.hash(password, 10);
     const [result] = await db.execute(
       "INSERT INTO users (username, password) VALUES (?, ?)",

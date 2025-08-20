@@ -2,6 +2,7 @@ const express = require("express");
 const db = require("../db");
 const { authRequired } = require("../middleware/auth");
 const router = express.Router();
+const { censor, maskProfanityBody } = require("../utils/profanity");
 
 // List posts
 router.get("/posts", async (_req, res) => {
@@ -87,21 +88,26 @@ router.get("/posts/:id", async (req, res) => {
 });
 
 // Create post
-router.post("/addpost", authRequired, async (req, res) => {
-  try {
-    const { text } = req.body ?? {};
-    if (!text)
-      return res.status(400).json({ error: "post information missing" });
-    const [r] = await db.execute(
-      "INSERT INTO posts (post_author, post, created_at) VALUES (?, ?, ?)",
-      [req.user.user_id, text, new Date()]
-    );
-    res.status(201).json({ insertedId: r.insertId });
-  } catch (err) {
-    console.error("POST /addpost ERROR:", err);
-    res.status(500).json({ error: "could not post" });
+router.post(
+  "/addpost",
+  authRequired,
+  maskProfanityBody("text"),
+  async (req, res) => {
+    try {
+      const { text } = req.body ?? {};
+      if (!text)
+        return res.status(400).json({ error: "post information missing" });
+      const [r] = await db.execute(
+        "INSERT INTO posts (post_author, post, created_at) VALUES (?, ?, ?)",
+        [req.user.user_id, text, new Date()]
+      );
+      res.status(201).json({ insertedId: r.insertId });
+    } catch (err) {
+      console.error("POST /addpost ERROR:", err);
+      res.status(500).json({ error: "could not post" });
+    }
   }
-});
+);
 
 // My posts
 router.get("/me/posts", authRequired, async (req, res) => {
@@ -147,59 +153,69 @@ router.delete("/posts/:id", authRequired, async (req, res) => {
 });
 
 // Edit post (sets updated_at)
-router.patch("/posts/:id", authRequired, async (req, res) => {
-  const id = Number(req.params.id);
-  const { text } = req.body ?? {};
-  if (!Number.isFinite(id))
-    return res.status(400).json({ error: "Invalid post id" });
-  if (!text || !text.trim())
-    return res.status(400).json({ error: "Text is required" });
+router.patch(
+  "/posts/:id",
+  authRequired,
+  maskProfanityBody("text"),
+  async (req, res) => {
+    const id = Number(req.params.id);
+    const { text } = req.body ?? {};
+    if (!Number.isFinite(id))
+      return res.status(400).json({ error: "Invalid post id" });
+    if (!text || !text.trim())
+      return res.status(400).json({ error: "Text is required" });
 
-  try {
-    const [[row]] = await db.execute(
-      "SELECT post_author FROM posts WHERE post_id = ?",
-      [id]
-    );
-    if (!row) return res.status(404).json({ error: "Post not found" });
-    if (row.post_author !== req.user.user_id)
-      return res.status(403).json({ error: "Forbidden" });
+    try {
+      const [[row]] = await db.execute(
+        "SELECT post_author FROM posts WHERE post_id = ?",
+        [id]
+      );
+      if (!row) return res.status(404).json({ error: "Post not found" });
+      if (row.post_author !== req.user.user_id)
+        return res.status(403).json({ error: "Forbidden" });
 
-    await db.execute(
-      "UPDATE posts SET post = ?, updated_at = NOW() WHERE post_id = ?",
-      [text.trim(), id]
-    );
+      await db.execute(
+        "UPDATE posts SET post = ?, updated_at = NOW() WHERE post_id = ?",
+        +[text.trim(), id]
+      );
 
-    const [[updated]] = await db.execute(
-      `SELECT p.post_id AS id, COALESCE(u.username,'anonymous') AS author, p.post AS text,
+      const [[updated]] = await db.execute(
+        `SELECT p.post_id AS id, COALESCE(u.username,'anonymous') AS author, p.post AS text,
               DATE_FORMAT(p.created_at,'%Y-%m-%dT%H:%i:%s') AS createdAt,
               DATE_FORMAT(p.updated_at,'%Y-%m-%dT%H:%i:%s') AS updatedAt
          FROM posts p
          JOIN users u ON u.user_id = p.post_author
         WHERE p.post_id = ?`,
-      [id]
-    );
-    res.json(updated);
-  } catch (err) {
-    console.error("PATCH /posts/:id ERROR:", err?.sqlMessage || err);
-    res.status(500).json({ error: "server error" });
+        [id]
+      );
+      res.json(updated);
+    } catch (err) {
+      console.error("PATCH /posts/:id ERROR:", err?.sqlMessage || err);
+      res.status(500).json({ error: "server error" });
+    }
   }
-});
+);
 
 // Add comment
-router.post("/addcomment", authRequired, async (req, res) => {
-  try {
-    const { text, post_id } = req.body ?? {};
-    if (!text || !post_id)
-      return res.status(400).json({ error: "comment information missing" });
-    const [r] = await db.execute(
-      "INSERT INTO comments (comment_author, post, created_at, comment) VALUES (?, ?, ?, ?)",
-      [req.user.user_id, post_id, new Date(), text]
-    );
-    res.status(201).json({ insertedId: r.insertId });
-  } catch (err) {
-    console.error("POST /addcomment ERROR:", err);
-    res.status(500).json({ error: "could not post" });
+router.post(
+  "/addcomment",
+  authRequired,
+  maskProfanityBody("text"),
+  async (req, res) => {
+    try {
+      const { text, post_id } = req.body ?? {};
+      if (!text || !post_id)
+        return res.status(400).json({ error: "comment information missing" });
+      const [r] = await db.execute(
+        "INSERT INTO comments (comment_author, post, created_at, comment) VALUES (?, ?, ?, ?)",
+        [req.user.user_id, post_id, new Date(), text]
+      );
+      res.status(201).json({ insertedId: r.insertId });
+    } catch (err) {
+      console.error("POST /addcomment ERROR:", err);
+      res.status(500).json({ error: "could not post" });
+    }
   }
-});
+);
 
 module.exports = router;
