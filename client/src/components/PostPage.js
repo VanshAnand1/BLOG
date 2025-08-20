@@ -1,6 +1,6 @@
 import { fetchPostWithComments } from "./Api";
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import axios from "axios";
 import { NavigationBar } from "./NavigationBar";
 
@@ -78,7 +78,13 @@ export default function PostPage() {
               <header className="flex items-start justify-between gap-4 mb-3">
                 <div>
                   <h2 className="text-teagreen font-semibold text-lg">
-                    {post.author}
+                    <Link
+                      to={`/u/${encodeURIComponent(post.author)}`}
+                      onClick={(e) => e.stopPropagation()}
+                      className="text-teagreen font-semibold hover:underline"
+                    >
+                      {post.author}
+                    </Link>
                   </h2>
                   <time className="text-aliceblue/70 text-xs">
                     {formatWhen(post.createdAt)}
@@ -116,7 +122,12 @@ export default function PostPage() {
                     >
                       <header className="flex items-center justify-between mb-2">
                         <h4 className="text-teagreen font-medium">
-                          {c.author ?? "anonymous"}
+                          <Link
+                            to={`/u/${encodeURIComponent(c.author)}`}
+                            className="text-teagreen font-semibold hover:underline"
+                          >
+                            {c.author ?? "anonymous"}
+                          </Link>
                         </h4>
                         <time className="text-aliceblue/70 text-xs">
                           {formatWhen(c.createdAt)}

@@ -87,7 +87,13 @@ export default function SearchResults() {
                   <article className="rounded-2xl border border-white/10 bg-white/5 p-5 shadow-sm transition hover:-translate-y-[1px] hover:border-white/20 hover:shadow-md focus-visible:ring-2 focus-visible:ring-teagreen/70">
                     <header className="flex items-start justify-between gap-4 mb-2">
                       <h2 className="text-teagreen font-semibold">
-                        {p.author}
+                        <Link
+                          to={`/u/${encodeURIComponent(p.author)}`}
+                          onClick={(e) => e.stopPropagation()}
+                          className="text-teagreen font-semibold hover:underline"
+                        >
+                          {p.author}
+                        </Link>
                       </h2>
                       <time className="text-aliceblue/70 text-xs">
                         {formatWhen(p.updatedAt || p.createdAt)}

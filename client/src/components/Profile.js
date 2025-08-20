@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import { NavigationBar } from "./NavigationBar";
 
@@ -153,7 +153,13 @@ export default function Profile() {
                   <header className="flex items-start justify-between gap-4 mb-2">
                     <div>
                       <h2 className="text-teagreen font-semibold">
-                        {p.author}
+                        <Link
+                          to={`/u/${encodeURIComponent(p.author)}`}
+                          onClick={(e) => e.stopPropagation()}
+                          className="text-teagreen font-semibold hover:underline"
+                        >
+                          {p.author}
+                        </Link>
                       </h2>
                       <time className="text-aliceblue/70 text-xs">
                         {formatWhen(p.createdAt)}

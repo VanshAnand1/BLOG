@@ -390,6 +390,49 @@ app.get("/search", async (req, res) => {
   }
 });
 
+app.get("/users/:username", async (req, res) => {
+  const username = req.params.username;
+  try {
+    const [[u]] = await db.execute(
+      "SELECT user_id AS id, username FROM users WHERE username = ? LIMIT 1",
+      [username]
+    );
+    if (!u) return res.status(404).json({ error: "User not found" });
+    res.json(u);
+  } catch (err) {
+    console.error("GET /users/:username ERROR:", err?.sqlMessage || err);
+    res.status(500).json({ error: "server error" });
+  }
+});
+
+app.get("/users/:username/posts", async (req, res) => {
+  const username = req.params.username;
+  try {
+    const [[u]] = await db.execute(
+      "SELECT user_id FROM users WHERE username = ? LIMIT 1",
+      [username]
+    );
+    if (!u) return res.status(404).json({ error: "User not found" });
+
+    const [rows] = await db.execute(
+      `SELECT p.post_id AS id,
+              u.username AS author,
+              p.post AS text,
+              DATE_FORMAT(p.created_at,'%Y-%m-%dT%H:%i:%s') AS createdAt,
+              DATE_FORMAT(p.updated_at,'%Y-%m-%dT%H:%i:%s') AS updatedAt
+         FROM posts p
+         JOIN users u ON u.user_id = p.post_author
+        WHERE p.post_author = ?
+        ORDER BY COALESCE(p.updated_at, p.created_at) DESC`,
+      [u.user_id]
+    );
+    res.json(rows);
+  } catch (err) {
+    console.error("GET /users/:username/posts ERROR:", err?.sqlMessage || err);
+    res.status(500).json({ error: "server error" });
+  }
+});
+
 app.listen(8080, () => {
   console.log("server listening on port 8080");
 });
