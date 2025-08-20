@@ -509,6 +509,29 @@ app.delete("/follow/:username", authRequired, async (req, res) => {
   }
 });
 
+app.delete("/followers/:username", authRequired, async (req, res) => {
+  const me = req.user.user_id; // the person being followed
+  const username = (req.params.username || "").trim();
+
+  try {
+    const [[u]] = await db.execute(
+      "SELECT user_id FROM users WHERE LOWER(username)=LOWER(?) LIMIT 1",
+      [username]
+    );
+    if (!u) return res.status(404).json({ error: "User not found" });
+
+    // Remove row where that user follows me
+    const [r] = await db.execute(
+      "DELETE FROM friends WHERE `user`=? AND `friend`=?",
+      [u.user_id, me]
+    );
+    res.json({ ok: true, removed: r.affectedRows > 0 });
+  } catch (err) {
+    console.error("DELETE /followers/:username ERROR:", err?.sqlMessage || err);
+    res.status(500).json({ error: "server error" });
+  }
+});
+
 // Do I follow :username?
 app.get("/follow/:username/status", authRequired, async (req, res) => {
   const me = req.user.user_id;

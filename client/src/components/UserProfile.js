@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import axios from "axios";
+import axios from "../http";
 import { NavigationBar } from "./NavigationBar";
 
 function formatWhen(when) {
@@ -16,6 +16,7 @@ function formatWhen(when) {
 export default function UserProfile() {
   const { username } = useParams();
   const navigate = useNavigate();
+
   const [profile, setProfile] = useState(null);
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -24,12 +25,38 @@ export default function UserProfile() {
   const [me, setMe] = useState(null);
   const [following, setFollowing] = useState(false);
   const [busy, setBusy] = useState(false);
+
   useEffect(() => {
     axios
       .get("/me", { withCredentials: true })
       .then((r) => setMe(r.data))
-      .catch(() => {});
+      .catch(() => setMe(null));
   }, []);
+
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        setLoading(true);
+        setError("");
+        const [uRes, pRes] = await Promise.all([
+          axios.get(`/users/${encodeURIComponent(username)}`),
+          axios.get(`/users/${encodeURIComponent(username)}/posts`),
+        ]);
+        if (!alive) return;
+        setProfile(uRes.data);
+        setPosts(Array.isArray(pRes.data) ? pRes.data : []);
+      } catch (e) {
+        if (!alive) return;
+        setError(e?.response?.data?.error || e.message);
+      } finally {
+        if (alive) setLoading(false);
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, [username]);
 
   useEffect(() => {
     if (!profile?.username) return;
@@ -63,39 +90,6 @@ export default function UserProfile() {
     }
   }
 
-  useEffect(() => {
-    let alive = true;
-    (async () => {
-      try {
-        setLoading(true);
-        setError("");
-        const me = await axios
-          .get("/me", { withCredentials: true })
-          .then((r) => r.data)
-          .catch(() => null);
-        if (me?.username === username) {
-          navigate("/profile", { replace: true });
-          return;
-        }
-        const [uRes, pRes] = await Promise.all([
-          axios.get(`/users/${encodeURIComponent(username)}`),
-          axios.get(`/users/${encodeURIComponent(username)}/posts`),
-        ]);
-        if (!alive) return;
-        setProfile(uRes.data);
-        setPosts(Array.isArray(pRes.data) ? pRes.data : []);
-      } catch (e) {
-        if (!alive) return;
-        setError(e?.response?.data?.error || e.message);
-      } finally {
-        if (alive) setLoading(false);
-      }
-    })();
-    return () => {
-      alive = false;
-    };
-  }, [username, navigate]);
-
   return (
     <div className="min-h-screen">
       <NavigationBar />
@@ -108,10 +102,26 @@ export default function UserProfile() {
           <div className="text-aliceblue/80">User not found.</div>
         ) : (
           <>
-            <header className="flex items-center justify-between">
+            <header className="flex items-center justify-between gap-4 flex-wrap">
               <h1 className="text-2xl font-semibold text-teagreen">
                 {profile.username}&rsquo;s Profile
               </h1>
+
+              <div className="flex items-center gap-2">
+                <Link
+                  to={`/u/${encodeURIComponent(profile.username)}/following`}
+                  className="px-3 py-1.5 rounded-md border border-white/10 text-aliceblue/90 hover:bg-white/10 transition"
+                >
+                  Following
+                </Link>
+                <Link
+                  to={`/u/${encodeURIComponent(profile.username)}/followers`}
+                  className="px-3 py-1.5 rounded-md border border-white/10 text-aliceblue/90 hover:bg-white/10 transition"
+                >
+                  Followers
+                </Link>
+              </div>
+
               <div className="flex items-center gap-3">
                 {me &&
                   me.username?.toLowerCase() !==
@@ -147,18 +157,24 @@ export default function UserProfile() {
                       role="button"
                       tabIndex={0}
                       onClick={() => navigate(`/posts/${p.id}`)}
-                      className="rounded-2xl border border-white/10 bg-white/5 p-5 shadow-sm cursor-pointer
-                                 hover:-translate-y-[1px] hover:border-white/20 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-teagreen/70"
+                      className="rounded-2xl border border-white/10 bg-white/5 p-5 shadow-sm cursor-pointer hover:-translate-y-[1px] hover:border-white/20 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-teagreen/70"
                     >
                       <header className="flex items-start justify-between gap-4 mb-2">
                         <div>
-                          <Link
-                            to={`/u/${encodeURIComponent(p.author)}`}
-                            onClick={(e) => e.stopPropagation()}
-                            className="text-teagreen font-semibold hover:underline"
-                          >
-                            {p.author}
-                          </Link>
+                          {p.author &&
+                          p.author.toLowerCase() !== "anonymous" ? (
+                            <Link
+                              to={`/u/${encodeURIComponent(p.author)}`}
+                              onClick={(e) => e.stopPropagation()}
+                              className="text-teagreen font-semibold hover:underline"
+                            >
+                              {p.author}
+                            </Link>
+                          ) : (
+                            <span className="text-teagreen font-semibold">
+                              {p.author ?? "anonymous"}
+                            </span>
+                          )}
                           <time className="block text-aliceblue/70 text-xs">
                             {formatWhen(p.createdAt)}
                             {p.updatedAt && p.updatedAt !== p.createdAt && (
