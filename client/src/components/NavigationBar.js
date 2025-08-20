@@ -1,29 +1,27 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import axios from "../http";
 
 export const NavigationBar = () => {
-  const [user, setUser] = useState(null);
+  const [me, setMe] = useState(undefined);
+  const [searchQuery, setSearchQuery] = useState("");
+  const navigate = useNavigate();
+  const { pathname, search } = useLocation();
+  const back = encodeURIComponent(pathname + search);
 
   useEffect(() => {
     axios
-      .get("http://localhost:8080/me", { withCredentials: true })
-      .then((res) => {
-        setUser(res.data);
-      })
-      .catch((err) => {
-        console.error("Not signed in:", err);
-      });
+      .get("/me", { withCredentials: true })
+      .then((r) => setMe(r.data))
+      .catch(() => setMe(null));
   }, []);
 
-  const [searchQuery, setSearchQuery] = useState("");
   const handleSearch = (e) => {
     e.preventDefault();
     const q = searchQuery.trim();
     navigate(q ? `/search?q=${encodeURIComponent(q)}` : `/search`);
   };
 
-  const navigate = useNavigate();
   const handleLogout = async () => {
     try {
       await axios.post("/logout", {}, { withCredentials: true });
@@ -36,7 +34,6 @@ export const NavigationBar = () => {
   return (
     <header className="sticky top-0 z-50 bg-zomp text-white border-b border-white/10">
       <div className="max-w-6xl mx-auto h-14 px-4 grid grid-cols-[auto,1fr,auto] items-center gap-4">
-        {/* Logo */}
         <Link
           to="/home"
           className="text-2xl font-bold tracking-tight text-teagreen"
@@ -44,7 +41,6 @@ export const NavigationBar = () => {
           BLOG
         </Link>
 
-        {/* Search */}
         <form onSubmit={handleSearch} className="w-full">
           <div className="flex w-full">
             <div className="relative flex-1">
@@ -64,9 +60,7 @@ export const NavigationBar = () => {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search..."
-                className="w-full h-10 rounded-l-xl bg-lightgray text-white placeholder-white/50
-                         pl-10 pr-3 border border-white/10 focus:outline-none focus:ring-2
-                         focus:ring-teagreen focus:border-transparent"
+                className="w-full h-10 rounded-l-xl bg-lightgray text-white placeholder-white/50 pl-10 pr-3 border border-white/10 focus:outline-none focus:ring-2 focus:ring-teagreen focus:border-transparent"
               />
             </div>
             <button
@@ -78,7 +72,6 @@ export const NavigationBar = () => {
           </div>
         </form>
 
-        {/* Actions */}
         <nav className="flex items-center gap-2 sm:gap-3">
           <Link
             to="/addpost"
@@ -88,14 +81,33 @@ export const NavigationBar = () => {
             <span className="hidden sm:inline">New</span>
           </Link>
           <Link
-            to="/profile"
-            className="h-10 px-3 rounded-md inline-flex items-center text-white/90 hover:bg-white/10 hover:text-white transition"
+            to="/profiles/search"
+            className="inline-flex items-center h-10 px-3 rounded-lg bg-teagreen/90 text-[#0b1321] font-medium hover:bg-teagreen transition"
           >
-            Profile: {user ? user.username.toUpperCase() : "not logged in :("}
+            User Search
           </Link>
+          {me === undefined ? (
+            <span className="inline-flex items-center h-10 px-3 rounded-lg border border-white/10 text-aliceblue/60">
+              Profile…
+            </span>
+          ) : me ? (
+            <Link
+              to={`/u/${encodeURIComponent(me.username)}`}
+              className="inline-flex items-center h-10 px-3 rounded-lg bg-teagreen/90 text-[#0b1321] font-medium hover:bg-teagreen transition"
+            >
+              Profile: {me.username.toUpperCase()}
+            </Link>
+          ) : (
+            <Link
+              to={`/signin?from=${back}`}
+              className="inline-flex items-center h-10 px-3 rounded-lg bg-teagreen/90 text-[#0b1321] font-medium hover:bg-teagreen transition"
+            >
+              Sign in
+            </Link>
+          )}
           <button
             onClick={handleLogout}
-            className="h-10 px-3 rounded-md inline-flex items-center text-white/90 hover:bg-white/10 hover:text-white transition"
+            className="inline-flex items-center h-10 px-3 rounded-lg bg-periwinkle/60 text-[#0b1321] font-medium hover:bg-periwinkle transition"
           >
             Logout
           </button>

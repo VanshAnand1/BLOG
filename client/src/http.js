@@ -1,6 +1,6 @@
 import axios from "axios";
 
-// Point to your API (leave "" if using CRA proxy)
+// Point to API
 axios.defaults.baseURL = "";
 axios.defaults.withCredentials = true;
 
