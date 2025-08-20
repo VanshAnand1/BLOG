@@ -461,6 +461,119 @@ app.get("/users/:username/posts", async (req, res) => {
   }
 });
 
+// I follow :username
+app.post("/follow/:username", authRequired, async (req, res) => {
+  const me = req.user.user_id;
+  const username = (req.params.username || "").trim();
+
+  try {
+    const [[u]] = await db.execute(
+      "SELECT user_id FROM users WHERE LOWER(username)=LOWER(?) LIMIT 1",
+      [username]
+    );
+    if (!u) return res.status(404).json({ error: "User not found" });
+    if (u.user_id === me)
+      return res.status(400).json({ error: "Cannot follow yourself" });
+
+    const [r] = await db.execute(
+      "INSERT IGNORE INTO friends (`user`, `friend`) VALUES (?, ?)",
+      [me, u.user_id]
+    );
+    res.status(r.affectedRows ? 201 : 200).json({ ok: true });
+  } catch (err) {
+    console.error("POST /follow/:username ERROR:", err?.sqlMessage || err);
+    res.status(500).json({ error: "server error" });
+  }
+});
+
+// I unfollow :username
+app.delete("/follow/:username", authRequired, async (req, res) => {
+  const me = req.user.user_id;
+  const username = (req.params.username || "").trim();
+
+  try {
+    const [[u]] = await db.execute(
+      "SELECT user_id FROM users WHERE LOWER(username)=LOWER(?) LIMIT 1",
+      [username]
+    );
+    if (!u) return res.status(404).json({ error: "User not found" });
+
+    await db.execute("DELETE FROM friends WHERE `user`=? AND `friend`=?", [
+      me,
+      u.user_id,
+    ]);
+    res.json({ ok: true });
+  } catch (err) {
+    console.error("DELETE /follow/:username ERROR:", err?.sqlMessage || err);
+    res.status(500).json({ error: "server error" });
+  }
+});
+
+// Do I follow :username?
+app.get("/follow/:username/status", authRequired, async (req, res) => {
+  const me = req.user.user_id;
+  const username = (req.params.username || "").trim();
+
+  try {
+    const [[u]] = await db.execute(
+      "SELECT user_id FROM users WHERE LOWER(username)=LOWER(?) LIMIT 1",
+      [username]
+    );
+    if (!u) return res.json({ following: false });
+
+    const [[row]] = await db.execute(
+      "SELECT friend_id FROM friends WHERE `user`=? AND `friend`=? LIMIT 1",
+      [me, u.user_id]
+    );
+    res.json({ following: !!row });
+  } catch (err) {
+    console.error(
+      "GET /follow/:username/status ERROR:",
+      err?.sqlMessage || err
+    );
+    res.status(500).json({ error: "server error" });
+  }
+});
+
+// (Optional) Lists for profile pages
+app.get("/users/:username/followers", async (req, res) => {
+  const username = (req.params.username || "").trim();
+  const [[u]] = await db.execute(
+    "SELECT user_id FROM users WHERE LOWER(username)=LOWER(?) LIMIT 1",
+    [username]
+  );
+  if (!u) return res.status(404).json({ error: "User not found" });
+
+  const [rows] = await db.execute(
+    `SELECT f.user AS id, us.username
+       FROM friends f
+       JOIN users us ON us.user_id = f.user
+      WHERE f.friend = ?
+      ORDER BY us.username ASC`,
+    [u.user_id]
+  );
+  res.json(rows);
+});
+
+app.get("/users/:username/following", async (req, res) => {
+  const username = (req.params.username || "").trim();
+  const [[u]] = await db.execute(
+    "SELECT user_id FROM users WHERE LOWER(username)=LOWER(?) LIMIT 1",
+    [username]
+  );
+  if (!u) return res.status(404).json({ error: "User not found" });
+
+  const [rows] = await db.execute(
+    `SELECT f.friend AS id, us.username
+       FROM friends f
+       JOIN users us ON us.user_id = f.friend
+      WHERE f.user = ?
+      ORDER BY us.username ASC`,
+    [u.user_id]
+  );
+  res.json(rows);
+});
+
 app.listen(8080, () => {
   console.log("server listening on port 8080");
 });

@@ -8,6 +8,67 @@ export default function UserSearch() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [results, setResults] = useState([]);
+  const [me, setMe] = useState(null);
+  const [following, setFollowing] = useState(new Set());
+  const [toggling, setToggling] = useState(null);
+
+  useEffect(() => {
+    axios
+      .get("/me", { withCredentials: true })
+      .then((r) => setMe(r.data))
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    const usernames = results.map((r) => r.username);
+    const run = async () => {
+      const next = new Set();
+      await Promise.all(
+        usernames.map(async (name) => {
+          if (me && me.username?.toLowerCase() === name.toLowerCase()) return;
+          try {
+            const { data } = await axios.get(
+              `/follow/${encodeURIComponent(name)}/status`,
+              { withCredentials: true }
+            );
+            if (data.following) next.add(name.toLowerCase());
+          } catch {}
+        })
+      );
+      setFollowing(next);
+    };
+    if (results.length) run();
+  }, [results, me]);
+
+  async function follow(name) {
+    try {
+      setToggling(name);
+      await axios.post(
+        `/follow/${encodeURIComponent(name)}`,
+        {},
+        { withCredentials: true }
+      );
+      setFollowing((prev) => new Set(prev).add(name.toLowerCase()));
+    } finally {
+      setToggling(null);
+    }
+  }
+
+  async function unfollow(name) {
+    try {
+      setToggling(name);
+      await axios.delete(`/follow/${encodeURIComponent(name)}`, {
+        withCredentials: true,
+      });
+      setFollowing((prev) => {
+        const n = new Set(prev);
+        n.delete(name.toLowerCase());
+        return n;
+      });
+    } finally {
+      setToggling(null);
+    }
+  }
 
   useEffect(() => {
     const term = q.trim();
@@ -77,20 +138,46 @@ export default function UserSearch() {
             </div>
           ) : results.length > 0 ? (
             <ul className="space-y-3">
-              {results.map((u) => (
-                <li key={u.id}>
-                  <Link
-                    to={`/u/${encodeURIComponent(u.username)}`}
-                    className="block rounded-xl border border-white/10 bg-white/5 p-4
-                               hover:border-white/20 hover:-translate-y-[1px] hover:shadow-md
-                               transition focus-visible:ring-2 focus-visible:ring-teagreen/70"
+              {results.map((u) => {
+                const isSelf =
+                  me && me.username?.toLowerCase() === u.username.toLowerCase();
+                const isFollowing = following.has(u.username.toLowerCase());
+                const busy = toggling === u.username;
+
+                return (
+                  <li
+                    key={u.id}
+                    className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 p-4"
                   >
-                    <span className="text-teagreen font-semibold">
+                    <Link
+                      to={`/u/${encodeURIComponent(u.username)}`}
+                      className="text-teagreen font-semibold"
+                    >
                       @{u.username}
-                    </span>
-                  </Link>
-                </li>
-              ))}
+                    </Link>
+                    {!isSelf &&
+                      (isFollowing ? (
+                        <button
+                          type="button"
+                          onClick={() => unfollow(u.username)}
+                          disabled={busy}
+                          className="px-3 py-1.5 rounded-md border border-white/10 text-aliceblue/90 hover:bg-white/10 transition disabled:opacity-60"
+                        >
+                          {busy ? "…" : "Unfollow"}
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => follow(u.username)}
+                          disabled={busy}
+                          className="px-3 py-1.5 rounded-md bg-teagreen/90 text-[#0b1321] font-medium hover:bg-teagreen transition disabled:opacity-60"
+                        >
+                          {busy ? "…" : "Follow"}
+                        </button>
+                      ))}
+                  </li>
+                );
+              })}
             </ul>
           ) : null)}
       </main>

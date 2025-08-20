@@ -21,6 +21,48 @@ export default function UserProfile() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  const [me, setMe] = useState(null);
+  const [following, setFollowing] = useState(false);
+  const [busy, setBusy] = useState(false);
+  useEffect(() => {
+    axios
+      .get("/me", { withCredentials: true })
+      .then((r) => setMe(r.data))
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    if (!profile?.username) return;
+    axios
+      .get(`/follow/${encodeURIComponent(profile.username)}/status`, {
+        withCredentials: true,
+      })
+      .then((r) => setFollowing(!!r.data?.following))
+      .catch(() => setFollowing(false));
+  }, [profile?.username]);
+
+  async function toggleFollow() {
+    if (!profile?.username) return;
+    setBusy(true);
+    try {
+      if (following) {
+        await axios.delete(`/follow/${encodeURIComponent(profile.username)}`, {
+          withCredentials: true,
+        });
+        setFollowing(false);
+      } else {
+        await axios.post(
+          `/follow/${encodeURIComponent(profile.username)}`,
+          {},
+          { withCredentials: true }
+        );
+        setFollowing(true);
+      }
+    } finally {
+      setBusy(false);
+    }
+  }
+
   useEffect(() => {
     let alive = true;
     (async () => {
@@ -68,11 +110,29 @@ export default function UserProfile() {
           <>
             <header className="flex items-center justify-between">
               <h1 className="text-2xl font-semibold text-teagreen">
-                {profile.username}&rsquo;s posts
+                {profile.username}&rsquo;s Profile
               </h1>
-              <span className="text-xs text-aliceblue/80 px-2 py-0.5 rounded-full border border-white/10">
-                {posts.length}
-              </span>
+              <div className="flex items-center gap-3">
+                {me &&
+                  me.username?.toLowerCase() !==
+                    profile.username.toLowerCase() && (
+                    <button
+                      type="button"
+                      onClick={toggleFollow}
+                      disabled={busy}
+                      className={
+                        following
+                          ? "px-3 py-1.5 rounded-md border border-white/10 text-aliceblue/90 hover:bg-white/10 transition disabled:opacity-60"
+                          : "px-3 py-1.5 rounded-md bg-teagreen/90 text-[#0b1321] font-medium hover:bg-teagreen transition disabled:opacity-60"
+                      }
+                    >
+                      {busy ? "…" : following ? "Unfollow" : "Follow"}
+                    </button>
+                  )}
+                <span className="text-xs text-aliceblue/80 px-2 py-0.5 rounded-full border border-white/10">
+                  {posts.length}
+                </span>
+              </div>
             </header>
 
             {posts.length === 0 ? (
