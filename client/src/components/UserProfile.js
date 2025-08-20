@@ -13,6 +13,17 @@ function formatWhen(when) {
   return isNaN(d) ? "" : d.toLocaleString();
 }
 
+function isInteractive(el) {
+  const tag = el?.tagName?.toLowerCase();
+  return (
+    tag === "input" ||
+    tag === "textarea" ||
+    tag === "button" ||
+    tag === "select" ||
+    el?.isContentEditable
+  );
+}
+
 export default function UserProfile() {
   const { username } = useParams();
   const navigate = useNavigate();
@@ -26,9 +37,20 @@ export default function UserProfile() {
   const [following, setFollowing] = useState(false);
   const [busy, setBusy] = useState(false);
 
+  // edit/delete state
+  const [editingId, setEditingId] = useState(null);
+  const [draft, setDraft] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [deletingId, setDeletingId] = useState(null);
+
+  const isSelf =
+    me &&
+    profile &&
+    me.username?.toLowerCase() === profile.username?.toLowerCase();
+
   useEffect(() => {
     axios
-      .get("/me", { withCredentials: true })
+      .get("/me")
       .then((r) => setMe(r.data))
       .catch(() => setMe(null));
   }, []);
@@ -61,9 +83,7 @@ export default function UserProfile() {
   useEffect(() => {
     if (!profile?.username) return;
     axios
-      .get(`/follow/${encodeURIComponent(profile.username)}/status`, {
-        withCredentials: true,
-      })
+      .get(`/follow/${encodeURIComponent(profile.username)}/status`)
       .then((r) => setFollowing(!!r.data?.following))
       .catch(() => setFollowing(false));
   }, [profile?.username]);
@@ -73,20 +93,57 @@ export default function UserProfile() {
     setBusy(true);
     try {
       if (following) {
-        await axios.delete(`/follow/${encodeURIComponent(profile.username)}`, {
-          withCredentials: true,
-        });
+        await axios.delete(`/follow/${encodeURIComponent(profile.username)}`);
         setFollowing(false);
       } else {
-        await axios.post(
-          `/follow/${encodeURIComponent(profile.username)}`,
-          {},
-          { withCredentials: true }
-        );
+        await axios.post(`/follow/${encodeURIComponent(profile.username)}`, {});
         setFollowing(true);
       }
     } finally {
       setBusy(false);
+    }
+  }
+
+  // edit/delete handlers
+  function startEdit(p) {
+    setEditingId(p.id);
+    setDraft(p.text || "");
+  }
+  function cancelEdit() {
+    setEditingId(null);
+    setDraft("");
+  }
+  async function saveEdit(id) {
+    if (!draft.trim()) return alert("Text is required");
+    setSaving(true);
+    try {
+      const { data: updated } = await axios.patch(`/posts/${id}`, {
+        text: draft,
+      });
+      setPosts((prev) =>
+        prev.map((p) =>
+          p.id === id
+            ? { ...p, text: updated.text, updatedAt: updated.updatedAt }
+            : p
+        )
+      );
+      cancelEdit();
+    } catch (err) {
+      alert(err?.response?.data?.error || "Update failed");
+    } finally {
+      setSaving(false);
+    }
+  }
+  async function handleDelete(id) {
+    if (!window.confirm("Delete this post? This cannot be undone.")) return;
+    setDeletingId(id);
+    try {
+      await axios.delete(`/posts/${id}`);
+      setPosts((prev) => prev.filter((p) => p.id !== id));
+    } catch (err) {
+      alert(err?.response?.data?.error || "Delete failed");
+    } finally {
+      setDeletingId(null);
     }
   }
 
@@ -123,24 +180,22 @@ export default function UserProfile() {
               </div>
 
               <div className="flex items-center gap-3">
-                {me &&
-                  me.username?.toLowerCase() !==
-                    profile.username.toLowerCase() && (
-                    <button
-                      type="button"
-                      onClick={toggleFollow}
-                      disabled={busy}
-                      className={
-                        following
-                          ? "px-3 py-1.5 rounded-md border border-white/10 text-aliceblue/90 hover:bg-white/10 transition disabled:opacity-60"
-                          : "px-3 py-1.5 rounded-md bg-teagreen/90 text-[#0b1321] font-medium hover:bg-teagreen transition disabled:opacity-60"
-                      }
-                    >
-                      {busy ? "…" : following ? "Unfollow" : "Follow"}
-                    </button>
-                  )}
+                {!isSelf && me && (
+                  <button
+                    type="button"
+                    onClick={toggleFollow}
+                    disabled={busy}
+                    className={
+                      following
+                        ? "px-3 py-1.5 rounded-md border border-white/10 text-aliceblue/90 hover:bg-white/10 transition disabled:opacity-60"
+                        : "px-3 py-1.5 rounded-md bg-teagreen/90 text-[#0b1321] font-medium hover:bg-teagreen transition disabled:opacity-60"
+                    }
+                  >
+                    {busy ? "…" : following ? "Unfollow" : "Follow"}
+                  </button>
+                )}
                 <span className="text-xs text-aliceblue/80 px-2 py-0.5 rounded-full border border-white/10">
-                  {posts.length}
+                  {posts.length} Posts
                 </span>
               </div>
             </header>
@@ -157,6 +212,17 @@ export default function UserProfile() {
                       role="button"
                       tabIndex={0}
                       onClick={() => navigate(`/posts/${p.id}`)}
+                      onKeyDown={(e) => {
+                        if (
+                          e.target !== e.currentTarget &&
+                          isInteractive(e.target)
+                        )
+                          return;
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          navigate(`/posts/${p.id}`);
+                        }
+                      }}
                       className="rounded-2xl border border-white/10 bg-white/5 p-5 shadow-sm cursor-pointer hover:-translate-y-[1px] hover:border-white/20 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-teagreen/70"
                     >
                       <header className="flex items-start justify-between gap-4 mb-2">
@@ -184,10 +250,72 @@ export default function UserProfile() {
                             )}
                           </time>
                         </div>
+
+                        {isSelf && editingId !== p.id && (
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                startEdit(p);
+                              }}
+                              className="text-xs px-2 py-1 rounded-md border border-white/10 text-aliceblue/90 hover:bg-white/10 transition"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDelete(p.id);
+                              }}
+                              disabled={deletingId === p.id}
+                              className="text-xs px-2 py-1 rounded-md border border-white/10 text-red-300 hover:bg-red-500/10 hover:text-red-200 transition disabled:opacity-60"
+                            >
+                              {deletingId === p.id ? "Deleting…" : "Delete"}
+                            </button>
+                          </div>
+                        )}
                       </header>
-                      <p className="text-aliceblue/95 leading-relaxed whitespace-pre-wrap">
-                        {p.text}
-                      </p>
+
+                      {isSelf && editingId === p.id ? (
+                        <div className="space-y-3">
+                          <textarea
+                            value={draft}
+                            onChange={(e) => setDraft(e.target.value)}
+                            onClick={(e) => e.stopPropagation()}
+                            onKeyDown={(e) => e.stopPropagation()}
+                            className="w-full min-h-[140px] resize-y rounded-lg border border-white/10 bg-transparent px-3 py-2 text-aliceblue focus:outline-none focus:ring-1 focus:ring-teagreen"
+                          />
+                          <div className="flex justify-end gap-2">
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                cancelEdit();
+                              }}
+                              className="px-3 py-1.5 rounded-md border border-white/10 text-aliceblue/90 hover:bg-white/10 transition"
+                            >
+                              Cancel
+                            </button>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                saveEdit(p.id);
+                              }}
+                              disabled={saving || !draft.trim()}
+                              className="px-3 py-1.5 rounded-md bg-teagreen/90 text-[#0b1321] font-medium hover:bg-teagreen transition disabled:opacity-60"
+                            >
+                              {saving ? "Saving…" : "Save"}
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <p className="text-aliceblue/95 leading-relaxed whitespace-pre-wrap">
+                          {p.text}
+                        </p>
+                      )}
                     </article>
                   </li>
                 ))}

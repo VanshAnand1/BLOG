@@ -127,12 +127,20 @@ export default function FollowListPage({ type }) {
       <main className="max-w-3xl mx-auto px-4 py-8 space-y-6">
         <header className="flex items-center justify-between">
           <h1 className="text-2xl font-semibold text-teagreen">
-            {type === "following" ? "Following" : "Followers"} — @{username}
+            {type === "following" ? (
+              <>
+                @{username}&rsquo;s following: {rows.length}
+              </>
+            ) : (
+              <>
+                @{username}&rsquo;s followers: {rows.length}
+              </>
+            )}
           </h1>
           <div className="flex gap-2">
             <Link
               to={`/u/${encodeURIComponent(username)}/following`}
-              className={`px-3 py-1.5 rounded-md border border-white/10 ${
+              className={`px-3 py-1.5 rounded-md border border-aliceblue/10 text-teagreen ${
                 type === "following" ? "bg-white/10" : ""
               }`}
             >
@@ -140,7 +148,7 @@ export default function FollowListPage({ type }) {
             </Link>
             <Link
               to={`/u/${encodeURIComponent(username)}/followers`}
-              className={`px-3 py-1.5 rounded-md border border-white/10 ${
+              className={`px-3 py-1.5 rounded-md border border-aliceblue/10 text-teagreen ${
                 type === "followers" ? "bg-white/10" : ""
               }`}
             >

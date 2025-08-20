@@ -1,6 +1,5 @@
 import { Routes, Route } from "react-router-dom";
 import { Homepage } from "./components/Homepage";
-// import Profile from "./components/Profile";
 import { SignUp } from "./components/SignUp";
 import { SignIn } from "./components/SignIn";
 import { AddPost } from "./components/AddPost";
@@ -28,7 +27,6 @@ function App() {
 
       {/* protected */}
       <Route element={<RequireAuth />}>
-        {/* <Route path="/profile" element={<Profile />} /> */}
         <Route path="/addpost" element={<AddPost />} />
         <Route
           path="/u/:username/following"
