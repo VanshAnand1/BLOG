@@ -357,7 +357,6 @@ app.patch("/posts/:id", authRequired, async (req, res) => {
   }
 });
 
-// this is generated code
 app.get("/search", async (req, res) => {
   const q = (req.query.q || "").trim();
   if (!q) return res.json([]);
