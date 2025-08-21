@@ -1,12 +1,14 @@
 import { useState } from "react";
 import api from "../http";
 import { useNavigate, Link, useLocation } from "react-router-dom";
+import { useToast } from "../ui/ToastProvider";
 
 export const SignUp = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
+  const toast = useToast();
 
   // optional redirect back to where user came from
   const params = new URLSearchParams(location.search);
@@ -27,7 +29,7 @@ export const SignUp = () => {
         err?.response?.status,
         err?.response?.data
       );
-      alert(err?.response?.data?.error || "Could not complete sign up");
+      toast.error(err?.response?.data?.error || "Could not complete sign up");
     }
   };
 

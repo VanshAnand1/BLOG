@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import api from "../http";
 import { NavigationBar } from "./NavigationBar";
+import { useToast } from "../ui/ToastProvider";
 
 function formatWhen(when) {
   if (!when) return "";
@@ -23,6 +24,7 @@ function isInteractive(el) {
 export default function UserProfile() {
   const { username } = useParams();
   const navigate = useNavigate();
+  const toast = useToast();
 
   const [profile, setProfile] = useState(null);
   const [posts, setPosts] = useState([]);
@@ -131,7 +133,7 @@ export default function UserProfile() {
     setDraft("");
   }
   async function saveEdit(id) {
-    if (!draft.trim()) return alert("Text is required");
+    if (!draft.trim()) return toast.error("Text is required");
     setSaving(true);
     try {
       const { data: updated } = await api.patch(`/posts/${id}`, {
@@ -146,7 +148,7 @@ export default function UserProfile() {
       );
       cancelEdit();
     } catch (err) {
-      alert(err?.response?.data?.error || "Update failed");
+      toast.error(err?.response?.data?.error || "Update failed");
     } finally {
       setSaving(false);
     }
@@ -166,7 +168,7 @@ export default function UserProfile() {
       setPosts((prev) => prev.filter((p) => p.id !== id));
       setConfirmId(null);
     } catch (err) {
-      alert(err?.response?.data?.error || "Delete failed");
+      toast.error(err?.response?.data?.error || "Delete failed");
     } finally {
       setDeletingId(null);
     }

@@ -3,6 +3,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import api from "../http";
 import { NavigationBar } from "./NavigationBar";
+import { useToast } from "../ui/ToastProvider";
 
 function formatWhen(when) {
   if (!when) return "";
@@ -38,6 +39,7 @@ export default function PostPage() {
   const [comments, setComments] = useState(null);
   const [error, setError] = useState("");
   const post_id = Number(id);
+  const toast = useToast();
 
   useEffect(() => {
     const ctrl = new AbortController();
@@ -96,7 +98,7 @@ export default function PostPage() {
         window.location.reload();
       } catch (err) {
         console.error(err);
-        alert(err.response?.data?.error || "Add comment failed");
+        toast.error(err.response?.data?.error || "Add comment failed");
       }
     };
 

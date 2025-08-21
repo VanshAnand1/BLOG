@@ -1,12 +1,14 @@
 import { useState } from "react";
 import api from "../http";
 import { useNavigate, Link, useLocation } from "react-router-dom";
+import { useToast } from "../ui/ToastProvider";
 
 export const SignIn = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
+  const toast = useToast();
 
   const params = new URLSearchParams(location.search);
   const rawFrom = params.get("from") || "/home";
@@ -21,7 +23,7 @@ export const SignIn = () => {
       navigate(from, { replace: true });
     } catch (err) {
       console.error(err);
-      alert(err.response?.data?.error || "Sign in failed");
+      toast.error(err?.response?.data?.error || "Sign in failed");
     }
   };
 
@@ -70,7 +72,6 @@ export const SignIn = () => {
           required
         />
 
-        {/* Only Cancel + Submit inside the card */}
         <div className="flex flex-col sm:flex-row sm:items-center gap-3">
           <button
             type="button"
@@ -87,7 +88,6 @@ export const SignIn = () => {
         </div>
       </form>
 
-      {/* Below the card */}
       <div className="w-full max-w-md mt-4 text-center">
         <Link
           to={`/signup?from=${encodeURIComponent(from)}`}

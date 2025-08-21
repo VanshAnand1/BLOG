@@ -2,10 +2,12 @@ import { useState } from "react";
 import api from "../http";
 import { useNavigate } from "react-router-dom";
 import { NavigationBar } from "./NavigationBar";
+import { useToast } from "../ui/ToastProvider";
 
 export const AddPost = () => {
   const [text, setText] = useState("");
   const navigate = useNavigate();
+  const toast = useToast();
 
   const submitHandler = async (e) => {
     e.preventDefault();
@@ -16,7 +18,7 @@ export const AddPost = () => {
       navigate("/home");
     } catch (err) {
       console.error("addpost error:", err.response?.status, err.response?.data);
-      alert(err.response?.data?.error || "Add post failed");
+      toast.error(err?.response?.data?.error || "Add comment failed");
     }
   };
 
