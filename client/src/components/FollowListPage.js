@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import axios from "axios";
+import api from "../http";
 import { NavigationBar } from "./NavigationBar";
 
 // Reusable page for either "followers" or "following"
@@ -20,8 +20,8 @@ export default function FollowListPage({ type }) {
 
   // who am I
   useEffect(() => {
-    axios
-      .get("/me", { withCredentials: true })
+    api
+      .get("/me")
       .then((r) => setMe(r.data))
       .catch(() => setMe(null));
   }, []);
@@ -31,7 +31,7 @@ export default function FollowListPage({ type }) {
     let alive = true;
     setLoading(true);
     setError("");
-    axios
+    api
       .get(`/users/${encodeURIComponent(username)}/${type}`)
       .then((r) => {
         if (alive) setRows(Array.isArray(r.data) ? r.data : []);
@@ -59,9 +59,8 @@ export default function FollowListPage({ type }) {
       await Promise.all(
         rows.map(async (r) => {
           try {
-            const { data } = await axios.get(
-              `/follow/${encodeURIComponent(r.username)}/status`,
-              { withCredentials: true }
+            const { data } = await api.get(
+              `/follow/${encodeURIComponent(r.username)}/status`
             );
             if (data.following) s.add(r.username.toLowerCase());
           } catch {}
@@ -74,11 +73,7 @@ export default function FollowListPage({ type }) {
   async function follow(name) {
     setBusy(name);
     try {
-      await axios.post(
-        `/follow/${encodeURIComponent(name)}`,
-        {},
-        { withCredentials: true }
-      );
+      await api.post(`/follow/${encodeURIComponent(name)}`, {});
       setFollowingSet((prev) => new Set(prev).add(name.toLowerCase()));
     } finally {
       setBusy(null);
@@ -88,9 +83,7 @@ export default function FollowListPage({ type }) {
   async function unfollow(name) {
     setBusy(name);
     try {
-      await axios.delete(`/follow/${encodeURIComponent(name)}`, {
-        withCredentials: true,
-      });
+      await api.delete(`/follow/${encodeURIComponent(name)}`, {});
       setFollowingSet((prev) => {
         const n = new Set(prev);
         n.delete(name.toLowerCase());
@@ -110,9 +103,7 @@ export default function FollowListPage({ type }) {
   async function removeFollower(name) {
     setBusy(name);
     try {
-      await axios.delete(`/followers/${encodeURIComponent(name)}`, {
-        withCredentials: true,
-      });
+      await api.delete(`/followers/${encodeURIComponent(name)}`, {});
       setRows((prev) =>
         prev.filter((r) => r.username.toLowerCase() !== name.toLowerCase())
       );

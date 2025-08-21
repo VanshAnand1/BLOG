@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import axios from "../http";
+import api from "../http";
 
 export const NavigationBar = () => {
   const [me, setMe] = useState(undefined);
@@ -10,8 +10,8 @@ export const NavigationBar = () => {
   const back = encodeURIComponent(pathname + search);
 
   useEffect(() => {
-    axios
-      .get("/me", { withCredentials: true })
+    api
+      .get("/me")
       .then((r) => setMe(r.data))
       .catch(() => setMe(null));
   }, []);
@@ -24,7 +24,7 @@ export const NavigationBar = () => {
 
   const handleLogout = async () => {
     try {
-      await axios.post("/logout", {}, { withCredentials: true });
+      await api.post("/logout", {});
       navigate("/signin");
     } catch (err) {
       console.error("Logout failed:", err);

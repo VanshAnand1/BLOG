@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import axios from "axios";
+import api from "../http";
 import { NavigationBar } from "./NavigationBar";
 
 function formatWhen(when) {
@@ -29,7 +29,7 @@ export default function SearchResults() {
 
     setLoading(true);
     setError("");
-    axios
+    api
       .get("/search", { params: { q } })
       .then((res) => {
         if (alive) setResults(Array.isArray(res.data) ? res.data : []);

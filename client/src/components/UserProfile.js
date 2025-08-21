@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import axios from "../http";
+import api from "../http";
 import { NavigationBar } from "./NavigationBar";
 
 function formatWhen(when) {
@@ -48,7 +48,7 @@ export default function UserProfile() {
     me.username?.toLowerCase() === profile.username?.toLowerCase();
 
   useEffect(() => {
-    axios
+    api
       .get("/me")
       .then((r) => setMe(r.data))
       .catch(() => setMe(null));
@@ -61,8 +61,8 @@ export default function UserProfile() {
         setLoading(true);
         setError("");
         const [uRes, pRes] = await Promise.all([
-          axios.get(`/users/${encodeURIComponent(username)}`),
-          axios.get(`/users/${encodeURIComponent(username)}/posts`),
+          api.get(`/users/${encodeURIComponent(username)}`),
+          api.get(`/users/${encodeURIComponent(username)}/posts`),
         ]);
         if (!alive) return;
         setProfile(uRes.data);
@@ -81,7 +81,7 @@ export default function UserProfile() {
 
   useEffect(() => {
     if (!profile?.username) return;
-    axios
+    api
       .get(`/follow/${encodeURIComponent(profile.username)}/status`)
       .then((r) => setFollowing(!!r.data?.following))
       .catch(() => setFollowing(false));
@@ -92,10 +92,10 @@ export default function UserProfile() {
     setBusy(true);
     try {
       if (following) {
-        await axios.delete(`/follow/${encodeURIComponent(profile.username)}`);
+        await api.delete(`/follow/${encodeURIComponent(profile.username)}`);
         setFollowing(false);
       } else {
-        await axios.post(`/follow/${encodeURIComponent(profile.username)}`, {});
+        await api.post(`/follow/${encodeURIComponent(profile.username)}`, {});
         setFollowing(true);
       }
     } finally {
@@ -115,7 +115,7 @@ export default function UserProfile() {
     if (!draft.trim()) return alert("Text is required");
     setSaving(true);
     try {
-      const { data: updated } = await axios.patch(`/posts/${id}`, {
+      const { data: updated } = await api.patch(`/posts/${id}`, {
         text: draft,
       });
       setPosts((prev) =>
@@ -136,7 +136,7 @@ export default function UserProfile() {
     if (!window.confirm("Delete this post? This cannot be undone.")) return;
     setDeletingId(id);
     try {
-      await axios.delete(`/posts/${id}`);
+      await api.delete(`/posts/${id}`);
       setPosts((prev) => prev.filter((p) => p.id !== id));
     } catch (err) {
       alert(err?.response?.data?.error || "Delete failed");

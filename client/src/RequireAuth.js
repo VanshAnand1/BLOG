@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
-import axios from "./http";
+import api from "./http";
 
 export default function RequireAuth() {
   const [ok, setOk] = useState(null); // null = checking, true = authed, false = not
@@ -8,7 +8,7 @@ export default function RequireAuth() {
 
   useEffect(() => {
     let cancel = false;
-    axios
+    api
       .get("/me")
       .then(() => {
         if (!cancel) setOk(true);

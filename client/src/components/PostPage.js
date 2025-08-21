@@ -1,7 +1,7 @@
 import { fetchPostWithComments } from "./Api";
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import axios from "axios";
+import api from "../http";
 import { NavigationBar } from "./NavigationBar";
 
 function formatWhen(when) {
@@ -24,8 +24,8 @@ export default function PostPage() {
   const [text, setText] = useState("");
   const submitHandler = (e) => {
     e.preventDefault();
-    axios
-      .post("/addcomment", { text, post_id }, { withCredentials: true })
+    api
+      .post("/addcomment", { text, post_id })
       .then((data) => {
         console.log(data);
         setText("");

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import axios from "../http";
+import api from "../http";
 import { Link } from "react-router-dom";
 import { NavigationBar } from "./NavigationBar";
 
@@ -26,7 +26,7 @@ export const DisplayPosts = () => {
         setLoading(true);
         setErr("");
         const url = feed === "global" ? "/posts" : "/followingposts";
-        const { data } = await axios.get(url);
+        const { data } = await api.get(url);
         if (!alive) return;
         setPosts(Array.isArray(data) ? data : []);
       } catch (e) {
