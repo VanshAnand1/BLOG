@@ -40,6 +40,9 @@ export default function UserProfile() {
   const [editingId, setEditingId] = useState(null);
   const [draft, setDraft] = useState("");
   const [saving, setSaving] = useState(false);
+
+  // NEW: modal state
+  const [confirmId, setConfirmId] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
 
   const isSelf =
@@ -87,6 +90,26 @@ export default function UserProfile() {
       .catch(() => setFollowing(false));
   }, [profile?.username]);
 
+  // Lock body scroll while modal is open
+  useEffect(() => {
+    if (confirmId !== null) {
+      const prev = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = prev;
+      };
+    }
+  }, [confirmId]);
+
+  // Close modal on Esc
+  useEffect(() => {
+    const onKey = (e) => e.key === "Escape" && setConfirmId(null);
+    if (confirmId !== null) {
+      window.addEventListener("keydown", onKey);
+      return () => window.removeEventListener("keydown", onKey);
+    }
+  }, [confirmId]);
+
   async function toggleFollow() {
     if (!profile?.username) return;
     setBusy(true);
@@ -132,12 +155,20 @@ export default function UserProfile() {
       setSaving(false);
     }
   }
-  async function handleDelete(id) {
-    if (!window.confirm("Delete this post? This cannot be undone.")) return;
+
+  // UPDATED: request delete via modal instead of window.confirm
+  function requestDelete(id) {
+    setConfirmId(id);
+  }
+
+  async function performDelete() {
+    const id = confirmId;
+    if (!id) return;
     setDeletingId(id);
     try {
       await api.delete(`/posts/${id}`);
       setPosts((prev) => prev.filter((p) => p.id !== id));
+      setConfirmId(null);
     } catch (err) {
       alert(err?.response?.data?.error || "Delete failed");
     } finally {
@@ -265,7 +296,7 @@ export default function UserProfile() {
                               type="button"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                handleDelete(p.id);
+                                requestDelete(p.id); // <-- open modal
                               }}
                               disabled={deletingId === p.id}
                               className="text-xs px-2 py-1 rounded-md border border-white/10 text-red-300 hover:bg-red-500/10 hover:text-red-200 transition disabled:opacity-60"
@@ -322,6 +353,57 @@ export default function UserProfile() {
           </>
         )}
       </main>
+
+      {/* CONFIRM DELETE MODAL */}
+      {confirmId !== null && (
+        <div
+          className="fixed inset-0 z-[70] overflow-hidden"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="del-title"
+        >
+          {/* backdrop */}
+          <div
+            className="absolute inset-0 bg-black/60"
+            onClick={() => setConfirmId(null)}
+          />
+          {/* panel */}
+          <div className="absolute inset-x-0 bottom-0 sm:inset-0 sm:flex sm:items-center sm:justify-center">
+            <div
+              className="mx-3 sm:mx-0 sm:w-full sm:max-w-md rounded-2xl border border-white/10 bg-white/5 shadow-xl
+                         p-5 sm:p-6 translate-y-0 sm:transition-transform duration-300"
+            >
+              <h2
+                id="del-title"
+                className="text-lg font-semibold text-teagreen mb-2"
+              >
+                Delete this post?
+              </h2>
+              <p className="text-sm text-aliceblue/80 mb-4">
+                This action cannot be undone.
+              </p>
+
+              <div className="flex flex-col sm:flex-row sm:justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setConfirmId(null)}
+                  className="w-full sm:w-auto px-3 py-2 rounded-md border border-white/10 text-aliceblue/90 hover:bg-white/10 transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={performDelete}
+                  disabled={deletingId === confirmId}
+                  className="w-full sm:w-auto px-3 py-2 rounded-md bg-red-500/80 text-white font-medium hover:bg-red-500 transition disabled:opacity-60"
+                >
+                  {deletingId === confirmId ? "Deleting…" : "Delete"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

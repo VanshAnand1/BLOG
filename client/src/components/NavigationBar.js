@@ -22,7 +22,7 @@ export const NavigationBar = () => {
     setMenuOpen(false);
   }, [pathname, search]);
 
-  // Allow ESC to close
+  // ESC to close
   useEffect(() => {
     const onKey = (e) => e.key === "Escape" && setMenuOpen(false);
     if (menuOpen) window.addEventListener("keydown", onKey);
@@ -46,8 +46,8 @@ export const NavigationBar = () => {
 
   return (
     <header className="sticky top-0 z-50 bg-zomp text-white border-b border-white/10">
-      <div className="max-w-6xl mx-auto h-14 px-4 grid grid-cols-[auto,1fr,auto] items-center gap-4">
-        {/* Logo stays */}
+      <div className="max-w-6xl mx-auto h-14 px-3 grid grid-cols-[auto,1fr,auto] items-center gap-4">
+        {/* Logo */}
         <Link
           to="/home"
           className="text-2xl font-bold tracking-tight text-teagreen"
@@ -55,7 +55,7 @@ export const NavigationBar = () => {
           BLOG
         </Link>
 
-        {/* Search stays */}
+        {/* Search */}
         <form onSubmit={handleSearch} className="w-full">
           <div className="flex w-full">
             <div className="relative flex-1">
@@ -76,8 +76,8 @@ export const NavigationBar = () => {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search..."
-                className="w-full h-10 rounded-l-xl bg-lightgray text-white placeholder-white/50 pl-10 pr-3 border border-white/10 focus:outline-none focus:ring-2 focus:ring-teagreen focus:border-transparent"
                 aria-label="Search posts"
+                className="w-full h-10 rounded-l-xl bg-lightgray text-white placeholder-white/50 pl-10 pr-3 border border-white/10 focus:outline-none focus:ring-2 focus:ring-teagreen focus:border-transparent"
               />
             </div>
             <button
@@ -91,7 +91,7 @@ export const NavigationBar = () => {
 
         {/* Right section */}
         <nav className="flex items-center gap-2 sm:gap-3">
-          {/* These hide below 950px (moved into drawer) */}
+          {/* These move into drawer below 950px */}
           <Link
             to="/addpost"
             className="inline-flex items-center h-10 px-3 rounded-lg bg-teagreen/90 text-[#0b1321] font-medium hover:bg-teagreen transition max-[950px]:hidden"
@@ -125,15 +125,15 @@ export const NavigationBar = () => {
             </Link>
           )}
 
-          {/* Logout stays at all sizes */}
+          {/* Logout: visible on desktop, moved into drawer on small */}
           <button
             onClick={handleLogout}
-            className="inline-flex items-center h-10 px-3 rounded-lg bg-periwinkle/60 text-[#0b1321] font-medium hover:bg-periwinkle transition"
+            className="inline-flex items-center h-10 px-3 rounded-lg bg-periwinkle/60 text-[#0b1321] font-medium hover:bg-periwinkle transition max-[950px]:hidden"
           >
             Logout
           </button>
 
-          {/* Hamburger: ONLY below 950px, placed to the right of Logout */}
+          {/* Hamburger: only below 950px, at far right */}
           <button
             type="button"
             onClick={() => setMenuOpen(true)}
@@ -155,24 +155,29 @@ export const NavigationBar = () => {
         </nav>
       </div>
 
-      {/* Drawer (right side). Render only below 950px; no click-blocking when closed */}
+      {/* Drawer (right side, only below 950px). No click-block + no horizontal overflow */}
       <div
         id="mobile-drawer"
-        className="hidden max-[950px]:block fixed inset-0 z-[60] pointer-events-none"
+        className={`hidden max-[950px]:block fixed inset-0 z-[60] overflow-hidden ${
+          menuOpen
+            ? "visible pointer-events-auto"
+            : "invisible pointer-events-none"
+        }`}
         aria-hidden={!menuOpen}
       >
         {/* Backdrop */}
         <div
           onClick={() => setMenuOpen(false)}
           className={`absolute inset-0 bg-black/40 transition-opacity duration-300 ease-out ${
-            menuOpen ? "opacity-100 pointer-events-auto" : "opacity-0"
+            menuOpen ? "opacity-100" : "opacity-0"
           }`}
         />
+
         {/* Panel */}
         <aside
-          className={`absolute right-0 top-0 h-full w-72 max-w-[85vw] bg-zomp border-l border-white/10 shadow-xl transition-transform duration-300 ease-in-out ${
-            menuOpen ? "translate-x-0 pointer-events-auto" : "translate-x-full"
-          }`}
+          className={`absolute right-0 top-0 h-full w-72 max-w-[85vw] bg-zomp border-l border-white/10 shadow-xl
+                      transition-transform duration-300 ease-in-out will-change-transform
+                      ${menuOpen ? "translate-x-0" : "translate-x-full"}`}
         >
           <div className="flex items-center justify-between h-14 px-4 border-b border-white/10">
             <span className="text-teagreen font-semibold">Menu</span>
@@ -232,6 +237,20 @@ export const NavigationBar = () => {
                 Sign in
               </Link>
             )}
+
+            {/* Logout inside drawer on small screens */}
+            {me ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setMenuOpen(false);
+                  handleLogout();
+                }}
+                className="inline-flex items-center h-11 px-3 rounded-lg bg-periwinkle/70 text-[#0b1321] font-medium hover:bg-periwinkle transition"
+              >
+                Logout
+              </button>
+            ) : null}
           </nav>
         </aside>
       </div>

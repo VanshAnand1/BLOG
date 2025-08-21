@@ -26,8 +26,7 @@ export default function PostPage() {
     e.preventDefault();
     api
       .post("/addcomment", { text, post_id })
-      .then((data) => {
-        console.log(data);
+      .then(() => {
         setText("");
         window.location.reload();
       })
@@ -61,20 +60,66 @@ export default function PostPage() {
   if (!post || comments === null)
     return <div style={{ padding: 16 }}>Loading…</div>;
 
+  // Reusable form (mobile + desktop)
+  const AddCommentForm = ({ className = "" }) => (
+    <form
+      onSubmit={submitHandler}
+      className={`rounded-2xl border border-white/10 bg-white/5 p-4 lg:p-6 shadow-sm w-full ${className}`}
+    >
+      <h3 className="text-center text-xl lg:text-2xl font-semibold text-teagreen mb-4 lg:mb-5">
+        Add a Comment
+      </h3>
+
+      <label
+        htmlFor="comment-text"
+        className="block text-sm text-aliceblue/90 mb-2"
+      >
+        Comment Text
+      </label>
+      <textarea
+        id="comment-text"
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        required
+        placeholder="Share your thoughts…"
+        className="block w-full min-h-[72px] lg:min-h-[120px] resize-y rounded-lg border border-white/10 bg-transparent px-3 py-2 text-aliceblue placeholder:text-white/40 focus:outline-none focus:ring-1 focus:ring-teagreen focus:border-teagreen mb-4 lg:mb-5"
+      />
+
+      <div className="flex justify-end gap-3">
+        <button
+          type="button"
+          onClick={() => setText("")}
+          className="px-3 py-1.5 rounded-md border border-white/10 text-aliceblue/90 hover:bg-white/10 transition"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          disabled={!text.trim()}
+          className="px-3 py-1.5 rounded-md bg-teagreen/90 text-[#0b1321] font-medium hover:bg-teagreen transition disabled:opacity-60 disabled:cursor-not-allowed"
+        >
+          Submit
+        </button>
+      </div>
+    </form>
+  );
+
   return (
     <div className="min-h-screen">
       <NavigationBar />
 
-      <div className="max-w-6xl mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* LEFT: Post + comments */}
-          <section className="lg:col-span-2 space-y-6">
-            {/* Post card */}
+      {/* container padding reduced on <lg */}
+      <div className="max-w-6xl mx-auto px-3 lg:px-4 py-5 lg:py-8">
+        {/* gap reduced on <lg */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 lg:gap-8">
+          {/* space reduced on <lg */}
+          <section className="lg:col-span-2 space-y-4 lg:space-y-6">
+            {/* Post card: p-4 on <lg, p-6 on lg+ */}
             <article
               key={post.id}
-              className="rounded-2xl border border-white/10 bg-white/5 p-6 shadow-sm"
+              className="rounded-2xl border border-white/10 bg-white/5 p-4 lg:p-6 shadow-sm"
             >
-              <header className="flex items-start justify-between gap-4 mb-3">
+              <header className="flex items-start justify-between gap-4 mb-2 lg:mb-3">
                 <div>
                   <h2 className="text-teagreen font-semibold text-lg">
                     <Link
@@ -101,9 +146,14 @@ export default function PostPage() {
               </p>
             </article>
 
-            {/* Comments */}
-            <article className="rounded-2xl border border-white/10 bg-white/5 p-6 shadow-sm">
-              <div className="flex items-center justify-between mb-4">
+            {/* Mobile/tablet: form above comments */}
+            <div className="lg:hidden">
+              <AddCommentForm />
+            </div>
+
+            {/* Comments: p-4 on <lg, p-6 on lg+ */}
+            <article className="rounded-2xl border border-white/10 bg-white/5 p-4 lg:p-6 shadow-sm">
+              <div className="flex items-center justify-between mb-3 lg:mb-4">
                 <h3 className="text-aliceblue font-semibold text-lg">
                   Comments
                 </h3>
@@ -113,13 +163,13 @@ export default function PostPage() {
               </div>
 
               {comments.length > 0 ? (
-                <ul className="space-y-4">
+                <ul className="space-y-3 lg:space-y-4">
                   {comments.map((c) => (
                     <li
                       key={c.id ?? `${c.postId}-${c.createdAt}`}
-                      className="rounded-xl border border-white/10 bg-white/[0.03] p-4 hover:border-white/20 transition"
+                      className="rounded-xl border border-white/10 bg-white/[0.03] p-3 lg:p-4 hover:border-white/20 transition"
                     >
-                      <header className="flex items-center justify-between mb-2">
+                      <header className="flex items-center justify-between mb-1.5 lg:mb-2">
                         <h4 className="text-teagreen font-medium">
                           <Link
                             to={`/u/${encodeURIComponent(c.author)}`}
@@ -146,48 +196,9 @@ export default function PostPage() {
             </article>
           </section>
 
-          {/* RIGHT: sticky Add Comment card */}
-          <aside className="lg:sticky lg:top-24 h-fit">
-            <form
-              onSubmit={submitHandler}
-              className="rounded-2xl border border-white/10 bg-white/5 p-6 shadow-sm w-full"
-            >
-              <h3 className="text-center text-2xl font-semibold text-teagreen mb-5">
-                Add a Comment
-              </h3>
-
-              <label
-                htmlFor="text"
-                className="block text-sm text-aliceblue/90 mb-2"
-              >
-                Comment Text
-              </label>
-              <textarea
-                id="text"
-                value={text}
-                onChange={(e) => setText(e.target.value)}
-                required
-                placeholder="Share your thoughts…"
-                className="block w-full min-h-[120px] resize-y rounded-lg border border-white/10 bg-transparent px-3 py-2 text-aliceblue placeholder:text-white/40 focus:outline-none focus:ring-1 focus:ring-teagreen focus:border-teagreen mb-5"
-              />
-
-              <div className="flex justify-end gap-3">
-                <button
-                  type="button"
-                  onClick={() => setText("")}
-                  className="px-3 py-1.5 rounded-md border border-white/10 text-aliceblue/90 hover:bg-white/10 transition"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={!text.trim()}
-                  className="px-3 py-1.5 rounded-md bg-teagreen/90 text-[#0b1321] font-medium hover:bg-teagreen transition disabled:opacity-60 disabled:cursor-not-allowed"
-                >
-                  Submit
-                </button>
-              </div>
-            </form>
+          {/* Desktop-only sticky form */}
+          <aside className="hidden lg:block lg:sticky lg:top-24 h-fit">
+            <AddCommentForm />
           </aside>
         </div>
       </div>
