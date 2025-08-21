@@ -13,8 +13,8 @@ router.get("/posts", async (_req, res) => {
         p.post_id AS id,
         u.username AS author,
         p.post AS text,
-        to_char(p.created_at, 'YYYY-MM-DD"T"HH24:MI:SS') AS "createdAt",
-        to_char(p.updated_at, 'YYYY-MM-DD"T"HH24:MI:SS') AS "updatedAt"
+        p.created_at AS "createdAt",
+        p.updated_at AS "updatedAt"
       FROM posts p
       JOIN users u ON u.user_id = p.post_author
       ORDER BY COALESCE(p.updated_at, p.created_at) DESC
@@ -36,8 +36,8 @@ router.get("/followingposts", authRequired, async (req, res) => {
         p.post_id AS id,
         u.username AS author,
         p.post AS text,
-        to_char(p.created_at, 'YYYY-MM-DD"T"HH24:MI:SS') AS "createdAt",
-        to_char(p.updated_at, 'YYYY-MM-DD"T"HH24:MI:SS') AS "updatedAt"
+        p.created_at AS "createdAt",
+        p.updated_at AS "updatedAt"
       FROM posts p
       JOIN users u ON u.user_id = p.post_author
       LEFT JOIN friends f
@@ -67,8 +67,8 @@ router.get("/posts/:id", async (req, res) => {
         p.post_id AS id,
         COALESCE(u.username, 'anonymous') AS author,
         p.post AS text,
-        to_char(p.created_at, 'YYYY-MM-DD"T"HH24:MI:SS') AS "createdAt",
-        to_char(p.updated_at, 'YYYY-MM-DD"T"HH24:MI:SS') AS "updatedAt"
+        p.created_at AS "createdAt",
+        p.updated_at AS "updatedAt"
       FROM posts p
       LEFT JOIN users u ON u.user_id = p.post_author
       WHERE p.post_id = ${id}
@@ -83,7 +83,7 @@ router.get("/posts/:id", async (req, res) => {
         c.post AS "postId",
         COALESCE(u.username, 'anonymous') AS author,
         c.comment AS text,
-        to_char(c.created_at, 'YYYY-MM-DD"T"HH24:MI:SS') AS "createdAt"
+        c.created_at AS "createdAt"
       FROM comments c
       LEFT JOIN users u ON u.user_id = c.comment_author
       WHERE c.post = ${id}
@@ -129,8 +129,8 @@ router.get("/me/posts", authRequired, async (req, res) => {
         p.post_id AS id,
         COALESCE(u.username, 'anonymous') AS author,
         p.post AS text,
-        to_char(p.created_at, 'YYYY-MM-DD"T"HH24:MI:SS') AS "createdAt",
-        to_char(p.updated_at, 'YYYY-MM-DD"T"HH24:MI:SS') AS "updatedAt"
+        p.created_at AS "createdAt",
+        p.updated_at AS "updatedAt"
       FROM posts p
       JOIN users u ON u.user_id = p.post_author
       WHERE p.post_author = ${req.user.user_id}
@@ -199,8 +199,8 @@ router.patch(
           p.post_id AS id,
           COALESCE(u.username, 'anonymous') AS author,
           p.post AS text,
-          to_char(p.created_at, 'YYYY-MM-DD"T"HH24:MI:SS') AS "createdAt",
-          to_char(p.updated_at, 'YYYY-MM-DD"T"HH24:MI:SS') AS "updatedAt"
+          p.created_at AS "createdAt",
+          p.updated_at AS "updatedAt"
         FROM posts p
         JOIN users u ON u.user_id = p.post_author
         WHERE p.post_id = ${id}

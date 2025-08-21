@@ -13,8 +13,8 @@ router.get("/search", async (req, res) => {
         p.post_id AS id,
         u.username AS author,
         p.post AS text,
-        to_char(p.created_at, 'YYYY-MM-DD"T"HH24:MI:SS') AS "createdAt",
-        to_char(p.updated_at, 'YYYY-MM-DD"T"HH24:MI:SS') AS "updatedAt",
+        p.created_at AS "createdAt",
+        p.updated_at AS "updatedAt",
         (
           CASE WHEN lower(p.post) = lower(${q}) THEN 100 ELSE 0 END +
           CASE WHEN left(lower(p.post), char_length(${q})) = lower(${q}) THEN 90 ELSE 0 END +

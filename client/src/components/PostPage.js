@@ -1,5 +1,5 @@
 import { fetchPostWithComments } from "./Api";
-import { useEffect, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import api from "../http";
 import { NavigationBar } from "./NavigationBar";
@@ -14,27 +14,34 @@ function formatWhen(when) {
   return isNaN(d) ? "" : d.toLocaleString();
 }
 
+// Match Tailwind's lg breakpoint
+function useMediaQuery(query) {
+  const get = () =>
+    typeof window !== "undefined" && window.matchMedia(query).matches;
+  const [matches, setMatches] = useState(get);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mql = window.matchMedia(query);
+    const onChange = (e) => setMatches(e.matches);
+    mql.addEventListener
+      ? mql.addEventListener("change", onChange)
+      : mql.addListener(onChange);
+    setMatches(mql.matches);
+    return () => {
+      mql.removeEventListener
+        ? mql.removeEventListener("change", onChange)
+        : mql.removeListener(onChange);
+    };
+  }, [query]);
+  return matches;
+}
+
 export default function PostPage() {
   const { id } = useParams();
   const [post, setPost] = useState(null);
   const [comments, setComments] = useState(null);
   const [error, setError] = useState("");
   const post_id = Number(id);
-
-  const [text, setText] = useState("");
-  const submitHandler = (e) => {
-    e.preventDefault();
-    api
-      .post("/addcomment", { text, post_id })
-      .then(() => {
-        setText("");
-        window.location.reload();
-      })
-      .catch((err) => {
-        console.error(err);
-        alert(err.response?.data?.error || "Add comment failed");
-      });
-  };
 
   useEffect(() => {
     const ctrl = new AbortController();
@@ -55,66 +62,99 @@ export default function PostPage() {
     return () => ctrl.abort();
   }, [id]);
 
+  const isLg = useMediaQuery("(min-width: 1024px)");
+
   if (error)
     return <div style={{ padding: 16, color: "crimson" }}>Error: {error}</div>;
   if (!post || comments === null)
     return <div style={{ padding: 16 }}>Loading…</div>;
 
-  // Reusable form (mobile + desktop)
-  const AddCommentForm = ({ className = "" }) => (
-    <form
-      onSubmit={submitHandler}
-      className={`rounded-2xl border border-white/10 bg-white/5 p-4 lg:p-6 shadow-sm w-full ${className}`}
-    >
-      <h3 className="text-center text-xl lg:text-2xl font-semibold text-teagreen mb-4 lg:mb-5">
-        Add a Comment
-      </h3>
+  // --- AddCommentForm: UNCONTROLLED textarea to prevent focus loss ---
+  function AddCommentForm({ className = "" }) {
+    const textareaRef = useRef(null);
+    const [hasText, setHasText] = useState(false);
+    const idFor = useId(); // avoid any id collisions
+    const taId = `${idFor}-comment-text`;
 
-      <label
-        htmlFor="comment-text"
-        className="block text-sm text-aliceblue/90 mb-2"
+    const handleInput = (e) => {
+      setHasText(e.currentTarget.value.trim().length > 0);
+    };
+
+    const handleCancel = () => {
+      if (textareaRef.current) {
+        textareaRef.current.value = "";
+        textareaRef.current.focus();
+      }
+      setHasText(false);
+    };
+
+    const handleSubmit = async (e) => {
+      e.preventDefault();
+      const text = textareaRef.current?.value ?? "";
+      const trimmed = text.trim();
+      if (!trimmed) return;
+      try {
+        await api.post("/addcomment", { text: trimmed, post_id });
+        if (textareaRef.current) textareaRef.current.value = "";
+        setHasText(false);
+        window.location.reload();
+      } catch (err) {
+        console.error(err);
+        alert(err.response?.data?.error || "Add comment failed");
+      }
+    };
+
+    return (
+      <form
+        onSubmit={handleSubmit}
+        className={`rounded-2xl border border-white/10 bg-white/5 p-4 lg:p-6 shadow-sm w-full ${className}`}
       >
-        Comment Text
-      </label>
-      <textarea
-        id="comment-text"
-        value={text}
-        onChange={(e) => setText(e.target.value)}
-        required
-        placeholder="Share your thoughts…"
-        className="block w-full min-h-[72px] lg:min-h-[120px] resize-y rounded-lg border border-white/10 bg-transparent px-3 py-2 text-aliceblue placeholder:text-white/40 focus:outline-none focus:ring-1 focus:ring-teagreen focus:border-teagreen mb-4 lg:mb-5"
-      />
+        <h3 className="text-center text-xl lg:text-2xl font-semibold text-teagreen mb-4 lg:mb-5">
+          Add a Comment
+        </h3>
 
-      <div className="flex justify-end gap-3">
-        <button
-          type="button"
-          onClick={() => setText("")}
-          className="px-3 py-1.5 rounded-md border border-white/10 text-aliceblue/90 hover:bg-white/10 transition"
-        >
-          Cancel
-        </button>
-        <button
-          type="submit"
-          disabled={!text.trim()}
-          className="px-3 py-1.5 rounded-md bg-teagreen/90 text-[#0b1321] font-medium hover:bg-teagreen transition disabled:opacity-60 disabled:cursor-not-allowed"
-        >
-          Submit
-        </button>
-      </div>
-    </form>
-  );
+        <label htmlFor={taId} className="block text-sm text-aliceblue/90 mb-2">
+          Comment Text
+        </label>
+        <textarea
+          id={taId}
+          ref={textareaRef}
+          defaultValue=""
+          onInput={handleInput}
+          placeholder="Share your thoughts…"
+          className="block w-full min-h-[72px] lg:min-h-[120px] resize-y rounded-lg border border-white/10 bg-transparent px-3 py-2 text-aliceblue placeholder:text-white/40 focus:outline-none focus:ring-1 focus:ring-teagreen focus:border-teagreen mb-4 lg:mb-5"
+        />
+
+        <div className="flex justify-end gap-3">
+          <button
+            type="button"
+            onClick={handleCancel}
+            className="px-3 py-1.5 rounded-md border border-white/10 text-aliceblue/90 hover:bg-white/10 transition"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            disabled={!hasText}
+            className="px-3 py-1.5 rounded-md bg-teagreen/90 text-[#0b1321] font-medium hover:bg-teagreen transition disabled:opacity-60 disabled:cursor-not-allowed"
+          >
+            Submit
+          </button>
+        </div>
+      </form>
+    );
+  }
+  // -------------------------------------------------------------------
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen overflow-x-hidden">
       <NavigationBar />
 
-      {/* container padding reduced on <lg */}
       <div className="max-w-6xl mx-auto px-3 lg:px-4 py-5 lg:py-8">
-        {/* gap reduced on <lg */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 lg:gap-8">
-          {/* space reduced on <lg */}
+          {/* LEFT: Post + (mobile form) + Comments */}
           <section className="lg:col-span-2 space-y-4 lg:space-y-6">
-            {/* Post card: p-4 on <lg, p-6 on lg+ */}
+            {/* Post card */}
             <article
               key={post.id}
               className="rounded-2xl border border-white/10 bg-white/5 p-4 lg:p-6 shadow-sm"
@@ -146,12 +186,10 @@ export default function PostPage() {
               </p>
             </article>
 
-            {/* Mobile/tablet: form above comments */}
-            <div className="lg:hidden">
-              <AddCommentForm />
-            </div>
+            {/* MOBILE/TABLET: form ABOVE comments */}
+            {!isLg && <AddCommentForm />}
 
-            {/* Comments: p-4 on <lg, p-6 on lg+ */}
+            {/* Comments */}
             <article className="rounded-2xl border border-white/10 bg-white/5 p-4 lg:p-6 shadow-sm">
               <div className="flex items-center justify-between mb-3 lg:mb-4">
                 <h3 className="text-aliceblue font-semibold text-lg">
@@ -196,10 +234,12 @@ export default function PostPage() {
             </article>
           </section>
 
-          {/* Desktop-only sticky form */}
-          <aside className="hidden lg:block lg:sticky lg:top-24 h-fit">
-            <AddCommentForm />
-          </aside>
+          {/* DESKTOP: sticky form on the right */}
+          {isLg && (
+            <aside className="lg:sticky lg:top-24 h-fit">
+              <AddCommentForm />
+            </aside>
+          )}
         </div>
       </div>
     </div>

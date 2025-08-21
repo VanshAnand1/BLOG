@@ -56,8 +56,8 @@ router.get("/users/:username/posts", async (req, res) => {
         p.post_id AS id,
         u.username AS author,
         p.post AS text,
-        to_char(p.created_at, 'YYYY-MM-DD"T"HH24:MI:SS') AS "createdAt",
-        to_char(p.updated_at, 'YYYY-MM-DD"T"HH24:MI:SS') AS "updatedAt"
+        p.created_at AS "createdAt",
+        p.updated_at AS "updatedAt"
       FROM posts p
       JOIN users u ON u.user_id = p.post_author
       WHERE p.post_author = ${u.user_id}
