@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import api from "../http";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { NavigationBar } from "./NavigationBar";
 
 function formatWhen(when) {
@@ -14,6 +14,7 @@ function formatWhen(when) {
 }
 
 export const DisplayPosts = () => {
+  const navigate = useNavigate();
   const [feed, setFeed] = useState("following"); // "following" | "global"
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -122,36 +123,43 @@ export const DisplayPosts = () => {
           <ul className="space-y-4">
             {posts.map((p) => (
               <li key={p.id}>
-                <Link
-                  to={`/posts/${p.id}`}
-                  className="group block focus:outline-none"
+                <article
+                  role="link"
+                  tabIndex={0}
+                  aria-label={`Open post by ${p.author}`}
+                  onClick={() => navigate(`/posts/${p.id}`)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      navigate(`/posts/${p.id}`);
+                    }
+                  }}
+                  className="group block rounded-2xl border border-white/10 bg-white/5 p-5 shadow-sm transition hover:-translate-y-[1px] hover:border-white/20 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-teagreen/70 cursor-pointer"
                 >
-                  <article className="rounded-2xl border border-white/10 bg-white/5 p-5 shadow-sm transition hover:-translate-y-[1px] hover:border-white/20 hover:shadow-md focus-visible:ring-2 focus-visible:ring-teagreen/70">
-                    <header className="flex items-start justify-between gap-4 mb-2">
-                      <h2 className="text-teagreen font-semibold">
-                        <Link
-                          to={`/u/${encodeURIComponent(p.author)}`}
-                          onClick={(e) => e.stopPropagation()}
-                          className="text-teagreen font-semibold hover:underline"
-                        >
-                          {p.author}
-                        </Link>
-                      </h2>
-                      <time className="text-aliceblue/70 text-sm">
-                        {formatWhen(p.createdAt)}
-                        {p.updatedAt && p.updatedAt !== p.createdAt && (
-                          <span className="ml-2 text-white/50">
-                            (edited {formatWhen(p.updatedAt)})
-                          </span>
-                        )}
-                      </time>
-                    </header>
+                  <header className="flex items-start justify-between gap-4 mb-2">
+                    <h2 className="text-teagreen font-semibold">
+                      <Link
+                        to={`/u/${encodeURIComponent(p.author)}`}
+                        onClick={(e) => e.stopPropagation()}
+                        className="text-teagreen font-semibold hover:underline"
+                      >
+                        {p.author}
+                      </Link>
+                    </h2>
+                    <time className="text-aliceblue/70 text-sm">
+                      {formatWhen(p.createdAt)}
+                      {p.updatedAt && p.updatedAt !== p.createdAt && (
+                        <span className="ml-2 text-white/50">
+                          (edited {formatWhen(p.updatedAt)})
+                        </span>
+                      )}
+                    </time>
+                  </header>
 
-                    <p className="text-aliceblue/95 leading-relaxed whitespace-pre-wrap">
-                      {p.text}
-                    </p>
-                  </article>
-                </Link>
+                  <p className="text-aliceblue/95 leading-relaxed whitespace-pre-wrap">
+                    {p.text}
+                  </p>
+                </article>
               </li>
             ))}
           </ul>

@@ -1,10 +1,6 @@
-const BASE = "/api";
+import api from "../http";
 
-export async function fetchPostWithComments(id, signal) {
-  const res = await fetch(`${BASE}/posts/${id}`, {
-    signal,
-    credentials: "include", // keep cookies when needed
-  });
-  if (!res.ok) throw new Error(await res.text());
-  return res.json();
+export async function fetchPostWithComments(id) {
+  const { data } = await api.get(`/posts/${id}`);
+  return data;
 }
