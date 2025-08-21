@@ -1,5 +1,5 @@
 import { useState } from "react";
-import axios from "axios";
+import api from "../http";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 
 export const SignIn = () => {
@@ -12,23 +12,17 @@ export const SignIn = () => {
   const rawFrom = params.get("from") || "/home";
   const from = rawFrom.startsWith("/") ? rawFrom : "/home";
 
-  const submitHandler = (e) => {
+  const submitHandler = async (e) => {
     e.preventDefault();
-    axios
-      .post("/signin", {
-        username: username,
-        password: password,
-      })
-      .then((data) => {
-        console.log(data);
-        setUsername("");
-        setPassword("");
-        navigate(from, { replace: true });
-      })
-      .catch((err) => {
-        console.error(err);
-        alert(err.response?.data?.error || "Sign in failed");
-      });
+    try {
+      await api.post("/signin", { username, password });
+      setUsername("");
+      setPassword("");
+      navigate(from, { replace: true });
+    } catch (err) {
+      console.error(err);
+      alert(err.response?.data?.error || "Sign in failed");
+    }
   };
 
   return (

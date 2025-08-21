@@ -1,5 +1,5 @@
 import { useState } from "react";
-import axios from "axios";
+import api from "../http";
 import { useNavigate, Link } from "react-router-dom";
 
 export const SignUp = () => {
@@ -10,13 +10,8 @@ export const SignUp = () => {
   const submitHandler = async (e) => {
     e.preventDefault();
     try {
-      await axios.post("/signup", { username, password });
-
-      await axios.post(
-        "/signin",
-        { username, password },
-        { withCredentials: true }
-      );
+      await api.post("/signup", { username, password });
+      await api.post("/signin", { username, password });
 
       setUsername("");
       setPassword("");

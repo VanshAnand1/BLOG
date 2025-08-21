@@ -1,6 +1,7 @@
 const express = require("express");
 const bcrypt = require("bcrypt");
 const { sg } = require("../db");
+const db = require("../db");
 const {
   authRequired,
   signAccessToken,
@@ -24,17 +25,16 @@ router.post("/signup", rejectProfaneUsername(), async (req, res) => {
 
     const hashed = await bcrypt.hash(password, 10);
 
-    const insertRes = await sg`
-      INSERT INTO users (username, password)
-      VALUES (${username}, ${hashed})
-      RETURNING user_id
-    `;
-    const insertedId = rowsOf(insertRes)[0]?.user_id;
+    // Postgres: RETURNING to get the id back
+    const [[row]] = await db.execute(
+      "INSERT INTO users (username, password) VALUES (?, ?) RETURNING user_id",
+      [username, hashed]
+    );
 
-    res.status(201).json({ insertedId });
+    res.status(201).json({ insertedId: row.user_id });
   } catch (err) {
-    // unique violation (Postgres) or MySQL-style code for safety
-    if (err?.code === "23505" || err?.code === "ER_DUP_ENTRY") {
+    // Postgres unique-violation
+    if (err?.code === "23505") {
       return res.status(409).json({ error: "username already exists" });
     }
     console.error("SIGNUP ERROR:", err);
