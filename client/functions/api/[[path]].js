@@ -1,22 +1,19 @@
-const API_ORIGIN = process.env.SERVER_URL;
+export async function onRequest({ request, env }) {
+  const API = env.API_ORIGIN;
+  if (!API) return new Response("API_ORIGIN not set", { status: 500 });
 
-export async function onRequest({ request }) {
-  const incoming = new URL(request.url);
+  const inUrl = new URL(request.url);
+  const outUrl = new URL(API);
+  outUrl.pathname = inUrl.pathname.replace(/^\/api/, "");
+  outUrl.search = inUrl.search;
 
-  // Build the upstream URL: same path/query, but drop the /api prefix.
-  const upstream = new URL(API_ORIGIN);
-  upstream.pathname = incoming.pathname.replace(/^\/api/, "");
-  upstream.search = incoming.search;
-
-  // Forward method/headers/body
   const init = {
     method: request.method,
-    headers: request.headers,
+    headers: new Headers(request.headers),
   };
+  init.headers.delete("host");
   if (!["GET", "HEAD"].includes(request.method)) {
     init.body = await request.arrayBuffer();
   }
-
-  // Pass the response straight through (including Set-Cookie)
-  return fetch(upstream.toString(), init);
+  return fetch(outUrl.toString(), init);
 }
