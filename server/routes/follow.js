@@ -1,10 +1,12 @@
 const express = require("express");
 const { sg } = require("../db");
-const auth = require("../middleware/auth");
+
+const { authRequired } = require("../middleware/auth.js");
+
 const router = express.Router();
 
 // Follow
-router.post("/follow/:username", auth.authRequired, async (req, res) => {
+router.post("/follow/:username", authRequired, async (req, res) => {
   const me = req.user.user_id;
   const username = (req.params.username || "").trim();
 
@@ -35,7 +37,7 @@ router.post("/follow/:username", auth.authRequired, async (req, res) => {
 });
 
 // Unfollow
-router.delete("/follow/:username", auth.authRequired, async (req, res) => {
+router.delete("/follow/:username", authRequired, async (req, res) => {
   const me = req.user.user_id;
   const username = (req.params.username || "").trim();
 
@@ -58,7 +60,7 @@ router.delete("/follow/:username", auth.authRequired, async (req, res) => {
 });
 
 // Remove a follower (kick)
-router.delete("/followers/:username", auth.authRequired, async (req, res) => {
+router.delete("/followers/:username", authRequired, async (req, res) => {
   const me = req.user.user_id;
   const username = (req.params.username || "").trim();
 
@@ -84,7 +86,7 @@ router.delete("/followers/:username", auth.authRequired, async (req, res) => {
 });
 
 // Do I follow :username?
-router.get("/follow/:username/status", auth.authRequired, async (req, res) => {
+router.get("/follow/:username/status", authRequired, async (req, res) => {
   const me = req.user.user_id;
   const username = (req.params.username || "").trim();
 

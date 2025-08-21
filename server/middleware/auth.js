@@ -1,49 +1,53 @@
-const cors = require("cors");
+// server/middleware/auth.js
+const jwt = require("jsonwebtoken");
 
-// Comma-separated exact origins, e.g. "http://localhost:3000,https://app.example.com"
-const allowedList = (process.env.ALLOWED_ORIGINS || "http://localhost:3000")
-  .split(",")
-  .map((s) => s.trim())
-  .filter(Boolean);
+const COOKIE_NAME = process.env.COOKIE_NAME || "access";
+const isProd = process.env.NODE_ENV === "production";
 
-const allowedSet = new Set(allowedList);
-
-// Comma-separated host suffixes to allow all subdomains, defaults to Cloudflare Pages
-// e.g. ".pages.dev,.example.com"
-const suffixList = (process.env.ALLOWED_HOST_SUFFIXES || ".pages.dev")
-  .split(",")
-  .map((s) => s.trim())
-  .filter(Boolean);
-
-function isAllowedBySuffix(hostname = "") {
-  return suffixList.some((suf) => hostname.endsWith(suf));
+function cookieOptions(ms) {
+  const opts = {
+    httpOnly: true,
+    sameSite: isProd ? "None" : "Lax",
+    secure: isProd,
+    maxAge: ms,
+    path: "/",
+  };
+  if (process.env.COOKIE_DOMAIN) opts.domain = process.env.COOKIE_DOMAIN;
+  return opts;
 }
 
-// Decide if the request Origin is allowed
-function corsOrigin(origin, callback) {
-  if (!origin) return callback(null, true); // curl/postman or same-origin
+function signAccessToken(user) {
+  return jwt.sign(
+    { sub: user.user_id, username: user.username },
+    process.env.JWT_SECRET,
+    { expiresIn: "15m" }
+  );
+}
+
+function verifyAccessToken(token) {
+  return jwt.verify(token, process.env.JWT_SECRET);
+}
+
+function authRequired(req, res, next) {
+  const hdr = req.headers.authorization || "";
+  const bearer = hdr.startsWith("Bearer ") ? hdr.slice(7) : null;
+  const token = req.cookies?.[COOKIE_NAME] || bearer;
+
+  if (!token) return res.status(401).json({ error: "not authenticated" });
 
   try {
-    const { hostname } = new URL(origin);
-    // Allow all configured wildcard host suffixes (incl. *.pages.dev by default)
-    if (isAllowedBySuffix(hostname)) return callback(null, true);
+    const payload = verifyAccessToken(token);
+    req.user = { user_id: payload.sub, username: payload.username };
+    next();
   } catch {
-    // fall through to explicit list
+    return res.status(401).json({ error: "invalid or expired token" });
   }
-
-  // Optionally allow "null" origins (file://, sandboxed iframes) via env
-  if (origin === "null" && process.env.ALLOW_NULL_ORIGIN === "true") {
-    return callback(null, true);
-  }
-
-  // Exact-origin allowlist
-  return callback(null, allowedSet.has(origin));
 }
 
-module.exports = cors({
-  origin: corsOrigin,
-  credentials: true,
-  methods: ["GET", "HEAD", "POST", "PATCH", "DELETE", "OPTIONS"],
-  // Omit allowedHeaders so cors reflects Access-Control-Request-Headers automatically.
-  optionsSuccessStatus: 204,
-});
+module.exports = {
+  authRequired,
+  signAccessToken,
+  verifyAccessToken,
+  cookieOptions,
+  COOKIE_NAME,
+};
