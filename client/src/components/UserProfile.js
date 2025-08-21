@@ -1,15 +1,12 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import axios from "../http";
+import api from "../http";
 import { NavigationBar } from "./NavigationBar";
+import { useToast } from "../ui/ToastProvider";
 
 function formatWhen(when) {
   if (!when) return "";
-  const s =
-    typeof when === "string" && when.includes(" ") && !when.includes("T")
-      ? when.replace(" ", "T")
-      : when;
-  const d = new Date(s);
+  const d = when instanceof Date ? when : new Date(when);
   return isNaN(d) ? "" : d.toLocaleString();
 }
 
@@ -27,6 +24,7 @@ function isInteractive(el) {
 export default function UserProfile() {
   const { username } = useParams();
   const navigate = useNavigate();
+  const toast = useToast();
 
   const [profile, setProfile] = useState(null);
   const [posts, setPosts] = useState([]);
@@ -40,6 +38,9 @@ export default function UserProfile() {
   const [editingId, setEditingId] = useState(null);
   const [draft, setDraft] = useState("");
   const [saving, setSaving] = useState(false);
+
+  // NEW: modal state
+  const [confirmId, setConfirmId] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
 
   const isSelf =
@@ -48,7 +49,7 @@ export default function UserProfile() {
     me.username?.toLowerCase() === profile.username?.toLowerCase();
 
   useEffect(() => {
-    axios
+    api
       .get("/me")
       .then((r) => setMe(r.data))
       .catch(() => setMe(null));
@@ -61,8 +62,8 @@ export default function UserProfile() {
         setLoading(true);
         setError("");
         const [uRes, pRes] = await Promise.all([
-          axios.get(`/users/${encodeURIComponent(username)}`),
-          axios.get(`/users/${encodeURIComponent(username)}/posts`),
+          api.get(`/users/${encodeURIComponent(username)}`),
+          api.get(`/users/${encodeURIComponent(username)}/posts`),
         ]);
         if (!alive) return;
         setProfile(uRes.data);
@@ -81,21 +82,41 @@ export default function UserProfile() {
 
   useEffect(() => {
     if (!profile?.username) return;
-    axios
+    api
       .get(`/follow/${encodeURIComponent(profile.username)}/status`)
       .then((r) => setFollowing(!!r.data?.following))
       .catch(() => setFollowing(false));
   }, [profile?.username]);
+
+  // Lock body scroll while modal is open
+  useEffect(() => {
+    if (confirmId !== null) {
+      const prev = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = prev;
+      };
+    }
+  }, [confirmId]);
+
+  // Close modal on Esc
+  useEffect(() => {
+    const onKey = (e) => e.key === "Escape" && setConfirmId(null);
+    if (confirmId !== null) {
+      window.addEventListener("keydown", onKey);
+      return () => window.removeEventListener("keydown", onKey);
+    }
+  }, [confirmId]);
 
   async function toggleFollow() {
     if (!profile?.username) return;
     setBusy(true);
     try {
       if (following) {
-        await axios.delete(`/follow/${encodeURIComponent(profile.username)}`);
+        await api.delete(`/follow/${encodeURIComponent(profile.username)}`);
         setFollowing(false);
       } else {
-        await axios.post(`/follow/${encodeURIComponent(profile.username)}`, {});
+        await api.post(`/follow/${encodeURIComponent(profile.username)}`, {});
         setFollowing(true);
       }
     } finally {
@@ -112,10 +133,10 @@ export default function UserProfile() {
     setDraft("");
   }
   async function saveEdit(id) {
-    if (!draft.trim()) return alert("Text is required");
+    if (!draft.trim()) return toast.error("Text is required");
     setSaving(true);
     try {
-      const { data: updated } = await axios.patch(`/posts/${id}`, {
+      const { data: updated } = await api.patch(`/posts/${id}`, {
         text: draft,
       });
       setPosts((prev) =>
@@ -127,19 +148,27 @@ export default function UserProfile() {
       );
       cancelEdit();
     } catch (err) {
-      alert(err?.response?.data?.error || "Update failed");
+      toast.error(err?.response?.data?.error || "Update failed");
     } finally {
       setSaving(false);
     }
   }
-  async function handleDelete(id) {
-    if (!window.confirm("Delete this post? This cannot be undone.")) return;
+
+  // UPDATED: request delete via modal instead of window.confirm
+  function requestDelete(id) {
+    setConfirmId(id);
+  }
+
+  async function performDelete() {
+    const id = confirmId;
+    if (!id) return;
     setDeletingId(id);
     try {
-      await axios.delete(`/posts/${id}`);
+      await api.delete(`/posts/${id}`);
       setPosts((prev) => prev.filter((p) => p.id !== id));
+      setConfirmId(null);
     } catch (err) {
-      alert(err?.response?.data?.error || "Delete failed");
+      toast.error(err?.response?.data?.error || "Delete failed");
     } finally {
       setDeletingId(null);
     }
@@ -265,7 +294,7 @@ export default function UserProfile() {
                               type="button"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                handleDelete(p.id);
+                                requestDelete(p.id); // <-- open modal
                               }}
                               disabled={deletingId === p.id}
                               className="text-xs px-2 py-1 rounded-md border border-white/10 text-red-300 hover:bg-red-500/10 hover:text-red-200 transition disabled:opacity-60"
@@ -322,6 +351,57 @@ export default function UserProfile() {
           </>
         )}
       </main>
+
+      {/* CONFIRM DELETE MODAL */}
+      {confirmId !== null && (
+        <div
+          className="fixed inset-0 z-[70] overflow-hidden"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="del-title"
+        >
+          {/* backdrop */}
+          <div
+            className="absolute inset-0 bg-black/60"
+            onClick={() => setConfirmId(null)}
+          />
+          {/* panel */}
+          <div className="absolute inset-x-0 bottom-0 sm:inset-0 sm:flex sm:items-center sm:justify-center">
+            <div
+              className="mx-3 sm:mx-0 sm:w-full sm:max-w-md rounded-2xl border border-white/10 bg-white/5 shadow-xl
+                         p-5 sm:p-6 translate-y-0 sm:transition-transform duration-300"
+            >
+              <h2
+                id="del-title"
+                className="text-lg font-semibold text-teagreen mb-2"
+              >
+                Delete this post?
+              </h2>
+              <p className="text-sm text-aliceblue/80 mb-4">
+                This action cannot be undone.
+              </p>
+
+              <div className="flex flex-col sm:flex-row sm:justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setConfirmId(null)}
+                  className="w-full sm:w-auto px-3 py-2 rounded-md border border-white/10 text-aliceblue/90 hover:bg-white/10 transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={performDelete}
+                  disabled={deletingId === confirmId}
+                  className="w-full sm:w-auto px-3 py-2 rounded-md bg-red-500/80 text-white font-medium hover:bg-red-500 transition disabled:opacity-60"
+                >
+                  {deletingId === confirmId ? "Deleting…" : "Delete"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

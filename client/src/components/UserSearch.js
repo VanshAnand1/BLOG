@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import axios from "axios";
+import api from "../http";
 import { NavigationBar } from "./NavigationBar";
 
 export default function UserSearch() {
@@ -13,8 +13,8 @@ export default function UserSearch() {
   const [toggling, setToggling] = useState(null);
 
   useEffect(() => {
-    axios
-      .get("/me", { withCredentials: true })
+    api
+      .get("/me")
       .then((r) => setMe(r.data))
       .catch(() => {});
   }, []);
@@ -27,9 +27,8 @@ export default function UserSearch() {
         usernames.map(async (name) => {
           if (me && me.username?.toLowerCase() === name.toLowerCase()) return;
           try {
-            const { data } = await axios.get(
-              `/follow/${encodeURIComponent(name)}/status`,
-              { withCredentials: true }
+            const { data } = await api.get(
+              `/follow/${encodeURIComponent(name)}/status`
             );
             if (data.following) next.add(name.toLowerCase());
           } catch {}
@@ -43,11 +42,7 @@ export default function UserSearch() {
   async function follow(name) {
     try {
       setToggling(name);
-      await axios.post(
-        `/follow/${encodeURIComponent(name)}`,
-        {},
-        { withCredentials: true }
-      );
+      await api.post(`/follow/${encodeURIComponent(name)}`, {});
       setFollowing((prev) => new Set(prev).add(name.toLowerCase()));
     } finally {
       setToggling(null);
@@ -57,9 +52,7 @@ export default function UserSearch() {
   async function unfollow(name) {
     try {
       setToggling(name);
-      await axios.delete(`/follow/${encodeURIComponent(name)}`, {
-        withCredentials: true,
-      });
+      await api.delete(`/follow/${encodeURIComponent(name)}`, {});
       setFollowing((prev) => {
         const n = new Set(prev);
         n.delete(name.toLowerCase());
@@ -84,7 +77,7 @@ export default function UserSearch() {
 
     const ctrl = new AbortController();
     const timer = setTimeout(() => {
-      axios
+      api
         .get("/users/search", { params: { q: term }, signal: ctrl.signal })
         .then((res) => setResults(Array.isArray(res.data) ? res.data : []))
         .catch((err) => {

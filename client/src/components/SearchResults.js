@@ -1,15 +1,11 @@
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import axios from "axios";
+import api from "../http";
 import { NavigationBar } from "./NavigationBar";
 
 function formatWhen(when) {
   if (!when) return "";
-  const s =
-    typeof when === "string" && when.includes(" ") && !when.includes("T")
-      ? when.replace(" ", "T")
-      : when;
-  const d = new Date(s);
+  const d = when instanceof Date ? when : new Date(when);
   return isNaN(d) ? "" : d.toLocaleString();
 }
 
@@ -29,7 +25,7 @@ export default function SearchResults() {
 
     setLoading(true);
     setError("");
-    axios
+    api
       .get("/search", { params: { q } })
       .then((res) => {
         if (alive) setResults(Array.isArray(res.data) ? res.data : []);

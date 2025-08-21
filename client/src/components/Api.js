@@ -1,7 +1,6 @@
-const BASE = "http://localhost:8080";
+import api from "../http";
 
-export async function fetchPostWithComments(id, signal) {
-  const res = await fetch(`${BASE}/posts/${id}`, { signal });
-  if (!res.ok) throw new Error(await res.text());
-  return res.json();
+export async function fetchPostWithComments(id) {
+  const { data } = await api.get(`/posts/${id}`);
+  return data;
 }

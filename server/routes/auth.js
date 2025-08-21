@@ -1,5 +1,6 @@
 const express = require("express");
 const bcrypt = require("bcrypt");
+const { sg } = require("../db");
 const db = require("../db");
 const {
   authRequired,
@@ -7,10 +8,13 @@ const {
   cookieOptions,
   COOKIE_NAME,
 } = require("../middleware/auth");
-
+const { rejectProfaneUsername } = require("../utils/profanity");
 const router = express.Router();
 
-router.post("/signup", async (req, res) => {
+// helper: normalize return shape from sg
+const rowsOf = (r) => (Array.isArray(r) ? r : r?.rows || []);
+
+router.post("/signup", rejectProfaneUsername(), async (req, res) => {
   try {
     const { username, password } = req.body ?? {};
     if (!username || !password) {
@@ -18,15 +22,21 @@ router.post("/signup", async (req, res) => {
         .status(400)
         .json({ error: "username and password are required" });
     }
+
     const hashed = await bcrypt.hash(password, 10);
-    const [result] = await db.execute(
-      "INSERT INTO users (username, password) VALUES (?, ?)",
+
+    // Postgres: RETURNING to get the id back
+    const [[row]] = await db.execute(
+      "INSERT INTO users (username, password) VALUES (?, ?) RETURNING user_id",
       [username, hashed]
     );
-    res.status(201).json({ insertedId: result.insertId });
+
+    res.status(201).json({ insertedId: row.user_id });
   } catch (err) {
-    if (err.code === "ER_DUP_ENTRY")
+    // Postgres unique-violation
+    if (err?.code === "23505") {
       return res.status(409).json({ error: "username already exists" });
+    }
     console.error("SIGNUP ERROR:", err);
     res.status(500).json({ error: "could not register user" });
   }
@@ -40,11 +50,16 @@ router.post("/signin", async (req, res) => {
         .status(400)
         .json({ error: "username and password are required" });
     }
-    const [[user]] = await db.execute(
-      "SELECT user_id, username, password FROM users WHERE username = ? LIMIT 1",
-      [username]
-    );
+
+    const selRes = await sg`
+      SELECT user_id, username, password
+      FROM users
+      WHERE username = ${username}
+      LIMIT 1
+    `;
+    const user = rowsOf(selRes)[0];
     if (!user) return res.status(401).json({ error: "invalid credentials" });
+
     const ok = await bcrypt.compare(password, user.password);
     if (!ok) return res.status(401).json({ error: "invalid credentials" });
 

@@ -71,6 +71,14 @@
     @apply scroll-smooth;
     @apply bg-darkgray;
   }
+
+  html,
+  body,
+  #root {
+    width: 100%;
+    overflow-x: hidden;
+    overscroll-behavior-x: contain; /* avoid side-swipe */
+  }
 }
 
 @layer components {

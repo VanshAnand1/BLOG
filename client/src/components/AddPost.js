@@ -1,25 +1,25 @@
 import { useState } from "react";
-import axios from "axios";
+import api from "../http";
 import { useNavigate } from "react-router-dom";
 import { NavigationBar } from "./NavigationBar";
+import { useToast } from "../ui/ToastProvider";
 
 export const AddPost = () => {
   const [text, setText] = useState("");
   const navigate = useNavigate();
+  const toast = useToast();
 
-  const submitHandler = (e) => {
+  const submitHandler = async (e) => {
     e.preventDefault();
-    axios
-      .post("/addpost", { text }, { withCredentials: true })
-      .then((data) => {
-        console.log(data);
-        setText("");
-        navigate("/home");
-      })
-      .catch((err) => {
-        console.error(err);
-        alert(err.response?.data?.error || "Add post failed");
-      });
+    try {
+      const res = await api.post("/addpost", { text });
+      console.log(res.data);
+      setText("");
+      navigate("/home");
+    } catch (err) {
+      console.error("addpost error:", err.response?.status, err.response?.data);
+      toast.error(err?.response?.data?.error || "Add comment failed");
+    }
   };
 
   return (

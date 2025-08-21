@@ -1,15 +1,19 @@
-import axios from "axios";
+import axiosLib from "axios";
 
-// Point to API
-axios.defaults.baseURL = "";
-axios.defaults.withCredentials = true;
+const baseURL =
+  process.env.NODE_ENV === "development" ? "http://localhost:8000" : "/api";
 
-// Redirect to /signin when the server says the session is gone
+const axios = axiosLib.create({
+  baseURL,
+  withCredentials: true,
+});
+
+// 401 → kick to /signin
 axios.interceptors.response.use(
   (res) => res,
   (err) => {
-    const status = err?.response?.status;
-    if (status === 401) {
+    const s = err?.response?.status;
+    if (s === 401) {
       const current = window.location.pathname + window.location.search;
       if (!current.startsWith("/signin")) {
         window.location.replace(`/signin?from=${encodeURIComponent(current)}`);

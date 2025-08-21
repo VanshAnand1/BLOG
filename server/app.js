@@ -1,6 +1,6 @@
 const express = require("express");
 const cookieParser = require("cookie-parser");
-const { corsMiddleware } = require("./middleware/cors");
+const corsMiddleware = require("./middleware/cors");
 const { requestLogger } = require("./utils/logger");
 
 // Routers
