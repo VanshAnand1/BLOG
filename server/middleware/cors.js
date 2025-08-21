@@ -15,7 +15,6 @@ function corsOrigin(origin, callback) {
     const { hostname } = new URL(origin);
     // Allow all Cloudflare Pages preview/prod domains
     if (hostname.endsWith(".pages.dev")) return callback(null, true);
-    // (Add other host-wide allowances, e.g. Koyeb custom domain)
   } catch {
     // fall through to explicit list
   }
