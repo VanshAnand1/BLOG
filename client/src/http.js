@@ -1,7 +1,8 @@
 import axios from "axios";
 
 // Point to API
-axios.defaults.baseURL = "";
+const API = "";
+axios.defaults.baseURL = API;
 axios.defaults.withCredentials = true;
 
 // Redirect to /signin when the server says the session is gone
