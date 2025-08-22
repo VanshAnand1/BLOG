@@ -4,6 +4,7 @@
 - TailwindCSS
 - Node JS
 - PostgresQL
+- React DevTools
 - Cloudflare
 - Koyeb
 - Supabase
@@ -11,6 +12,8 @@
 A clean, mobile-friendly place to write posts, follow people, and talk in comments.
 
 Try it out! https://blog-3ec.pages.dev/
+
+Please note that the server will need to start up if it has been inactive for some time, so it may take a moment for your actions to register initially. 
 
 ## Table of contents
 - [The Inspiration](#the-inspiration)
@@ -30,16 +33,16 @@ The tech choices were intentional. As a Computer Science student looking for an 
 ---
 
 ## TechStack
-- **Frontend:** React, TailwindCSS
-  - React and TailwindCSS allowed me to create a dynamic, responsive, and user friendly frontend for BLOG
+- **Frontend:** React, TailwindCSS, React DevTools
+  - React and TailwindCSS allowed me to create a dynamic, responsive, and user friendly frontend for BLOG. React DevTools helped a ton with debugging. 
 - **Backend:** Node.js
   - Node JS gave me an easy way to host the backend for the server. This was how my frontend was able to communicate with the database. 
 - **Database:** PostgreSQL
   - PostgresQL provided me with a fast and easy way to post and fetch data from the database. 
 - **Infra/Hosting:**
-  - Cloudflare: Free hosting for the frontend - fairly easy to set up
-  - Koyeb: Free hosting for the backend - extremely easy to set up
-  - Supabase: Free hosting for the database - fairly easy to set up
+  - Cloudflare: Free hosting for the frontend - fairly easy to set up.
+  - Koyeb: Free hosting for the backend - extremely easy to set up.
+  - Supabase: Free hosting for the database - fairly easy to set up.
 
 ---
 
