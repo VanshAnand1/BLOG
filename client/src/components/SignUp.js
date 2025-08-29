@@ -6,6 +6,7 @@ import { useToast } from "../ui/ToastProvider";
 export const SignUp = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
   const toast = useToast();
@@ -18,11 +19,18 @@ export const SignUp = () => {
   const submitHandler = async (e) => {
     e.preventDefault();
     try {
-      await api.post("/signup", { username, password });
-      await api.post("/signin", { username, password });
-      setUsername("");
-      setPassword("");
-      navigate(from, { replace: true });
+      if (password === confirmPassword) {
+        await api.post("/signup", { username, password });
+        await api.post("/signin", { username, password });
+        setUsername("");
+        setPassword("");
+        setConfirmPassword("");
+        navigate(from, { replace: true });
+      } else {
+        setPassword("");
+        setConfirmPassword("");
+        toast.error("Passwords do not match - please try again");
+      }
     } catch (err) {
       console.error(
         "signup/signin error:",
@@ -75,6 +83,22 @@ export const SignUp = () => {
           onChange={(e) => setPassword(e.target.value)}
           className="w-full h-11 rounded-lg bg-lightgray/80 text-white placeholder-white/50 px-3 border border-white/10 focus:outline-none focus:ring-2 focus:ring-teagreen focus:border-transparent mb-5 lg:mb-6"
           placeholder="Create a strong password"
+          required
+        />
+        <label
+          htmlFor="password"
+          className="block text-sm text-aliceblue mb-1.5"
+        >
+          Confirm Password
+        </label>
+        <input
+          id="confirmPassword"
+          type="password"
+          autoComplete="new-password"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          className="w-full h-11 rounded-lg bg-lightgray/80 text-white placeholder-white/50 px-3 border border-white/10 focus:outline-none focus:ring-2 focus:ring-teagreen focus:border-transparent mb-5 lg:mb-6"
+          placeholder="Retype your password"
           required
         />
 
