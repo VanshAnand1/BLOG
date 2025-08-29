@@ -11,7 +11,7 @@ function formatWhen(when) {
 
 export const DisplayPosts = () => {
   const navigate = useNavigate();
-  const [feed, setFeed] = useState("following"); // "following" | "global"
+  const [feed, setFeed] = useState("global"); // "following" | "global"
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState("");
