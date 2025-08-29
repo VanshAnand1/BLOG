@@ -79,7 +79,7 @@ export const SignUp = () => {
         />
 
         {/* Only Cancel + Submit in the card */}
-        <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 justify-center ">
           <button
             type="button"
             className="w-full sm:w-auto px-4 py-2 rounded-lg border border-white/15 text-aliceblue hover:bg-white/10 transition"
