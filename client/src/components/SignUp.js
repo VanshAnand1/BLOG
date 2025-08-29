@@ -10,6 +10,7 @@ export const SignUp = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const toast = useToast();
+  const showError = confirmPassword && password !== confirmPassword;
 
   // optional redirect back to where user came from
   const params = new URLSearchParams(location.search);
@@ -101,6 +102,17 @@ export const SignUp = () => {
           placeholder="Retype your password"
           required
         />
+        <div
+          aria-live="polite"
+          className={`text-sm h-5 transition-opacity -mt-6 mb-4
+              ${
+                showError
+                  ? "text-red-300 opacity-100 visible"
+                  : "opacity-0 invisible"
+              }`}
+        >
+          Passwords do not match
+        </div>
 
         {/* Only Cancel + Submit in the card */}
         <div className="flex flex-col sm:flex-row sm:items-center gap-3 justify-center ">
