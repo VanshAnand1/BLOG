@@ -104,6 +104,14 @@ export const SignUp = () => {
           Already have an account? Sign in
         </Link>
       </div>
+      <div className="w-full max-w-md mt-4 text-center">
+        <Link
+          to={`/home`}
+          className="inline-block w-full sm:w-auto px-4 py-2 rounded-lg bg-periwinkle/70 text-[#0b1321] font-medium hover:bg-periwinkle transition"
+        >
+          Continue as a Guest
+        </Link>
+      </div>
     </div>
   );
 };
