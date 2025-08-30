@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import api from "../http";
 import { NavigationBar } from "./NavigationBar";
 import { useToast } from "../ui/ToastProvider";
+import LikeButton from "../ui/LikeButton";
 
 function formatWhen(when) {
   if (!when) return "";
@@ -343,6 +344,16 @@ export default function UserProfile() {
                           {p.text}
                         </p>
                       )}
+                      <div className="mt-3">
+                        <LikeButton
+                          postId={p.id}
+                          initialLikes={p.likes ?? 0}
+                          initialLikedByMe={p.likedByMe ?? null}
+                          onAuthRequired={() =>
+                            toast.error("Please sign in to like posts")
+                          }
+                        />
+                      </div>
                     </article>
                   </li>
                 ))}

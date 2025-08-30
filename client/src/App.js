@@ -25,18 +25,18 @@ function App() {
 
       <Route path="/logout" element={<SignIn />} />
       <Route path="/" element={<SignIn />} />
+      <Route
+        path="/u/:username/following"
+        element={<FollowListPage type="following" />}
+      />
+      <Route
+        path="/u/:username/followers"
+        element={<FollowListPage type="followers" />}
+      />
 
       {/* protected */}
       <Route element={<RequireAuth />}>
         <Route path="/addpost" element={<AddPost />} />
-        <Route
-          path="/u/:username/following"
-          element={<FollowListPage type="following" />}
-        />
-        <Route
-          path="/u/:username/followers"
-          element={<FollowListPage type="followers" />}
-        />
       </Route>
 
       {/* fallback */}

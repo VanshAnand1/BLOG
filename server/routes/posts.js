@@ -6,15 +6,25 @@ const router = express.Router();
 const { censor, maskProfanityBody } = require("../utils/profanity");
 
 // List posts
-router.get("/posts", async (_req, res) => {
+router.get("/posts", async (req, res) => {
   try {
+    const meId = req.user?.user_id ?? null;
+
     const { rows } = await sg`
       SELECT
         p.post_id AS id,
         u.username AS author,
         p.post AS text,
         p.created_at AS "createdAt",
-        p.updated_at AS "updatedAt"
+        p.updated_at AS "updatedAt",
+        (SELECT COUNT(*)::int FROM likes l WHERE l.liked_post = p.post_id) AS "likes",
+        CASE
+          WHEN ${meId}::int IS NULL THEN NULL
+          ELSE EXISTS (
+            SELECT 1 FROM likes l2
+            WHERE l2.liked_post = p.post_id AND l2.user_id = ${meId}
+          )
+        END AS "likedByMe"
       FROM posts p
       JOIN users u ON u.user_id = p.post_author
       ORDER BY COALESCE(p.updated_at, p.created_at) DESC
@@ -37,7 +47,12 @@ router.get("/followingposts", authRequired, async (req, res) => {
         u.username AS author,
         p.post AS text,
         p.created_at AS "createdAt",
-        p.updated_at AS "updatedAt"
+        p.updated_at AS "updatedAt",
+        (SELECT COUNT(*)::int FROM likes l WHERE l.liked_post = p.post_id) AS "likes",
+        EXISTS (
+          SELECT 1 FROM likes l2
+          WHERE l2.liked_post = p.post_id AND l2.user_id = ${me}
+        ) AS "likedByMe"
       FROM posts p
       JOIN users u ON u.user_id = p.post_author
       LEFT JOIN friends f
@@ -47,7 +62,6 @@ router.get("/followingposts", authRequired, async (req, res) => {
       ORDER BY COALESCE(p.updated_at, p.created_at) DESC
       LIMIT 100
     `;
-
     res.json(rows);
   } catch (err) {
     console.error("GET /followingposts ERROR:", err);
@@ -62,13 +76,23 @@ router.get("/posts/:id", async (req, res) => {
     return res.status(400).json({ error: "Invalid post id" });
 
   try {
+    const meId = req.user?.user_id ?? null;
+
     const postRes = await sg`
       SELECT
         p.post_id AS id,
         COALESCE(u.username, 'anonymous') AS author,
         p.post AS text,
         p.created_at AS "createdAt",
-        p.updated_at AS "updatedAt"
+        p.updated_at AS "updatedAt",
+        (SELECT COUNT(*)::int FROM likes l WHERE l.liked_post = p.post_id) AS "likes",
+        CASE
+          WHEN ${meId}::int IS NULL THEN NULL
+          ELSE EXISTS (
+            SELECT 1 FROM likes l2
+            WHERE l2.liked_post = p.post_id AND l2.user_id = ${meId}
+          )
+        END AS "likedByMe"
       FROM posts p
       LEFT JOIN users u ON u.user_id = p.post_author
       WHERE p.post_id = ${id}
@@ -124,16 +148,22 @@ router.post(
 // My posts
 router.get("/me/posts", authRequired, async (req, res) => {
   try {
+    const me = req.user.user_id;
     const { rows } = await sg`
       SELECT
         p.post_id AS id,
         COALESCE(u.username, 'anonymous') AS author,
         p.post AS text,
         p.created_at AS "createdAt",
-        p.updated_at AS "updatedAt"
+        p.updated_at AS "updatedAt",
+        (SELECT COUNT(*)::int FROM likes l WHERE l.liked_post = p.post_id) AS "likes",
+        EXISTS (
+          SELECT 1 FROM likes l2
+          WHERE l2.liked_post = p.post_id AND l2.user_id = ${me}
+        ) AS "likedByMe"
       FROM posts p
       JOIN users u ON u.user_id = p.post_author
-      WHERE p.post_author = ${req.user.user_id}
+      WHERE p.post_author = ${me}
       ORDER BY COALESCE(p.updated_at, p.created_at) DESC
     `;
     res.json(rows);
@@ -237,5 +267,73 @@ router.post(
     }
   }
 );
+
+// Like a post
+router.post("/posts/:id/like", authRequired, async (req, res) => {
+  const id = Number(req.params.id);
+  if (!Number.isFinite(id)) return res.status(400).json({ error: "bad id" });
+
+  try {
+    // idempotent insert (no UNIQUE needed)
+    await sg`
+      INSERT INTO likes (liked_post, user_id)
+      SELECT ${id}, ${req.user.user_id}
+      WHERE NOT EXISTS (
+        SELECT 1 FROM likes WHERE liked_post = ${id} AND user_id = ${req.user.user_id}
+      )
+    `;
+    const c =
+      await sg`SELECT COUNT(*)::int AS c FROM likes WHERE liked_post = ${id}`;
+    res.json({ ok: true, liked: true, likes: c.rows[0].c });
+  } catch (err) {
+    console.error("POST /posts/:id/like ERROR:", err);
+    res.status(500).json({ error: "server error" });
+  }
+});
+
+// Unlike a post
+router.delete("/posts/:id/like", authRequired, async (req, res) => {
+  const id = Number(req.params.id);
+  if (!Number.isFinite(id)) return res.status(400).json({ error: "bad id" });
+
+  try {
+    await sg`DELETE FROM likes WHERE liked_post = ${id} AND user_id = ${req.user.user_id}`;
+    const c =
+      await sg`SELECT COUNT(*)::int AS c FROM likes WHERE liked_post = ${id}`;
+    res.json({ ok: true, liked: false, likes: c.rows[0].c });
+  } catch (err) {
+    console.error("DELETE /posts/:id/like ERROR:", err);
+    res.status(500).json({ error: "server error" });
+  }
+});
+
+router.get("/posts/:id/like", authRequired, async (req, res) => {
+  const id = Number(req.params.id);
+  if (!Number.isFinite(id)) return res.status(400).json({ error: "bad id" });
+
+  try {
+    const me = req.user.user_id;
+
+    const likedRes = await sg`
+      SELECT 1 FROM likes
+      WHERE liked_post = ${id} AND user_id = ${me}
+      LIMIT 1
+    `;
+    const countRes = await sg`
+      SELECT COUNT(*)::int AS c
+      FROM likes
+      WHERE liked_post = ${id}
+    `;
+
+    res.json({
+      authed: true,
+      liked: likedRes.rowCount > 0,
+      likes: countRes.rows[0].c,
+    });
+  } catch (err) {
+    console.error("GET /posts/:id/like ERROR:", err);
+    res.status(500).json({ error: "server error" });
+  }
+});
 
 module.exports = router;
