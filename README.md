@@ -59,7 +59,7 @@ The tech choices were intentional. As a Computer Science student looking for an 
 ## Journey
 - [Initial Publish](#august-21-2025-initial-publish)
 - [Update 1](#august-29-2025-update-1)
-- 
+
 ### <a id="august-21-2025-initial-publish"></a> August 21, 2025 (initial publish):
 I started by designing the basic page layout and navigation bar for the page. This part was fairly simple as it was just js/html code. 
 
