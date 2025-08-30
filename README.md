@@ -9,7 +9,7 @@
 - Koyeb
 - Supabase
 
-A clean, mobile-friendly place to write posts, follow people, and talk in comments.
+A clean, mobile-friendly place to write and like posts, follow people, and talk in comments.
 
 Try it out! https://blog-3ec.pages.dev/
 
@@ -47,9 +47,9 @@ The tech choices were intentional. As a Computer Science student looking for an 
 ---
 
 ## Features
-- **Posts:** create, edit, delete, comment
+- **Posts:** create, edit, delete, comment, and like
 - **Comments:** comments on posts
-- **Following:** follow, unfollow, following feed for posts
+- **Following:** follow, unfollow, following/global feeds for posts
 - **Search:** search by post text, search for users
 - **Auth:** secure JWT cookie tokens
 - **Responsive UI:** different site styling based on screen size
@@ -57,6 +57,10 @@ The tech choices were intentional. As a Computer Science student looking for an 
 ---
 
 ## Journey
+- [Initial Publish](#august-21-2025-initial-publish)
+- [Update 1](#august-29-2025-update-1)
+- 
+### <a id="august-21-2025-initial-publish"></a> August 21, 2025 (initial publish):
 I started by designing the basic page layout and navigation bar for the page. This part was fairly simple as it was just js/html code. 
 
 The next step in creating BLOG was to make the database on MySQLWorkbench. I made all of the necessary tables and hosted the SQL server from my device. I then linked the signin/signup pages to the database, making sure that accounts could be created and signed into. 
@@ -79,15 +83,27 @@ Then, I created different feeds for the main page, letting users decide whether 
 
 Now came hosting. This part took a long time. I started with Supabase for the database. I created a new database and implemented all of the tables that I had on my hosted SQL serer. Next, I moved to Koyeb for my backend. The biggest issue I faced while doing this was updating my SQL database functions to handle PostgresQL (pg) calls instead. After this, the backend was live! Next came Cloudflare for the frontend. After a number of dependency and CORS issues, my website was live, but this was not the end of my work related to hosting. After this, I had to make sure that I could still develop locally on my device without changing all of my database calls manually every time. This involved setting up a check for whether the site was being run on Cloudflare or locally, and then adapting the server calls to the required location. After this, I added mobile support, restyling the elements to work on any screen size. After a few more small design changes (Toasts, time zones, website logo and description), I was ready to call hosting complete. 
 
-This was just the journey so far, up to date for August 21st, 2025. Stay tuned for more updates to this project. 
+### <a id="august-29-2025-update-1"></a> August 29, 2025 (Update 1):
+After showing BLOG to my parents and a few friends, I had received some pieces of feedback. This feedback included changes to the onboarding process, a lack of interaction between users and posts, and just some general bugfixes. 
+
+First, I started with the onboarding changes. This started with centering the buttons and adding a guest mode. The guest mode feature was one that I came up with for an easy introduction to BLOG. The initial requirement to create an account but the burden of action on the user, and when introducing them a new product, the user should not be the one having to do the work. With the addition of guest mode, the user has a way to get an idea of what they are signing themselves up for, and they only have to create an account to perform actions that need a user to point back to (creating posts/comments, liking posts, following users). 
+
+Next came making the global feed the default, this was previously the following feed. This change came naturally following the addition of guest mode, as introducing a new user to an empty page is not a very good experience. Letting the user explore and see other's posts first was a much better beginning. 
+
+Now, I added some QOL changes to the signup process. I had been given feedback to add a password confirmation so the user doesn't accidentally mistype their password when signing up and get locked out. I added a live message for whether the passwords typed matched. 
+
+The biggest feature added in this update was the ability to like posts. Users can now show their support by adding a thumbs up to posts they enjoyed. This feature requires the user to be signed in. 
+
+Lastly, I changed the cancel button on the add post page to navigate the user to the page they were previously on, and if no such page is found, they are directed to the homepage. 
+
+There are plenty more features I plan to add, so stay tuned!
+
+---
 
 ### What's next?
 I have some small changes and features that I would like to add next, including: 
-- Liking Posts
 - Editing/Deleting Comments
 - Replying to Comments
-- Password Confirmation on Sign up
-- Small design changes for mobile
 - Blocking Users
 
 ---
