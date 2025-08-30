@@ -54,7 +54,10 @@ export const AddPost = () => {
           <div className="mt-5 flex justify-end gap-3">
             <button
               type="button"
-              onClick={() => setText("")}
+              onClick={() => {
+                setText("");
+                navigate("/home");
+              }}
               className="px-3 py-1.5 rounded-md border border-white/10 text-aliceblue/90 hover:bg-white/10 transition"
             >
               Cancel
