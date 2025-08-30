@@ -91,7 +91,7 @@ export const SignIn = () => {
       <div className="w-full max-w-md mt-4 text-center">
         <Link
           to={`/signup?from=${encodeURIComponent(from)}`}
-          className="inline-block w-full sm:w-auto px-4 py-2 rounded-lg bg-periwinkle/70 text-[#0b1321] font-medium hover:bg-periwinkle transition"
+          className="inline-block w-full sm:w-auto px-4 py-2 rounded-lg bg-periwinkle/85 text-[#0b1321] font-medium hover:bg-periwinkle transition"
         >
           Don’t have an account? Sign up
         </Link>
@@ -99,7 +99,7 @@ export const SignIn = () => {
       <div className="w-full max-w-md mt-4 text-center">
         <Link
           to={`/home`}
-          className="inline-block w-full sm:w-auto px-4 py-2 rounded-lg bg-periwinkle/70 text-[#0b1321] font-medium hover:bg-periwinkle transition"
+          className="inline-block w-full sm:w-auto px-4 py-2 rounded-lg bg-gray-300 text-[#0b1321] font-medium hover:bg-gray-200 transition"
         >
           Continue as a Guest
         </Link>
