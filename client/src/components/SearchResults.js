@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import api from "../http";
 import { NavigationBar } from "./NavigationBar";
+import LikeButton from "../ui/LikeButton";
+import { useToast } from "../ui/ToastProvider";
 
 function formatWhen(when) {
   if (!when) return "";
@@ -15,6 +17,7 @@ export default function SearchResults() {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const toast = useToast();
 
   useEffect(() => {
     let alive = true;
@@ -103,6 +106,16 @@ export default function SearchResults() {
                     <p className="text-aliceblue/95 leading-relaxed whitespace-pre-wrap">
                       {p.text}
                     </p>
+                    <div className="mt-3">
+                      <LikeButton
+                        postId={p.id}
+                        initialLikes={p.likes ?? 0}
+                        initialLikedByMe={p.likedByMe ?? null}
+                        onAuthRequired={() =>
+                          toast.error("Please sign in to like posts")
+                        }
+                      />
+                    </div>
                   </article>
                 </Link>
               </li>

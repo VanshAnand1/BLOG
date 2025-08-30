@@ -42,6 +42,8 @@ router.get("/users/:username", async (req, res) => {
 router.get("/users/:username/posts", async (req, res) => {
   const username = (req.params.username || "").trim();
   try {
+    const meId = req.user?.user_id ?? null;
+
     const uRes = await sg`
       SELECT user_id
       FROM users
@@ -54,12 +56,20 @@ router.get("/users/:username/posts", async (req, res) => {
     const { rows } = await sg`
       SELECT
         p.post_id AS id,
-        u.username AS author,
+        au.username AS author,
         p.post AS text,
         p.created_at AS "createdAt",
-        p.updated_at AS "updatedAt"
+        p.updated_at AS "updatedAt",
+        (SELECT COUNT(*)::int FROM likes l WHERE l.liked_post = p.post_id) AS "likes",
+        CASE
+          WHEN ${meId}::int IS NULL THEN NULL
+          ELSE EXISTS (
+            SELECT 1 FROM likes l2
+            WHERE l2.liked_post = p.post_id AND l2.user_id = ${meId}
+          )
+        END AS "likedByMe"
       FROM posts p
-      JOIN users u ON u.user_id = p.post_author
+      JOIN users au ON au.user_id = p.post_author
       WHERE p.post_author = ${u.user_id}
       ORDER BY COALESCE(p.updated_at, p.created_at) DESC
     `;

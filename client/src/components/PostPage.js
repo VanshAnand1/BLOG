@@ -4,6 +4,7 @@ import { useParams, Link } from "react-router-dom";
 import api from "../http";
 import { NavigationBar } from "./NavigationBar";
 import { useToast } from "../ui/ToastProvider";
+import LikeButton from "../ui/LikeButton";
 
 function formatWhen(when) {
   if (!when) return "";
@@ -182,6 +183,16 @@ export default function PostPage() {
               <p className="text-aliceblue leading-relaxed whitespace-pre-wrap text-[0.975rem]">
                 {post.text}
               </p>
+              <div className="mt-3">
+                <LikeButton
+                  postId={post.id}
+                  initialLikes={post.likes ?? 0}
+                  initialLikedByMe={post.likedByMe ?? null}
+                  onAuthRequired={() =>
+                    toast.error("Please sign in to like posts")
+                  }
+                />
+              </div>
             </article>
 
             {/* MOBILE/TABLET: form ABOVE comments */}

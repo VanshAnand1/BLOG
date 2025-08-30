@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import api from "../http";
 import { Link, useNavigate } from "react-router-dom";
 import { NavigationBar } from "./NavigationBar";
+import LikeButton from "../ui/LikeButton";
+import { useToast } from "../ui/ToastProvider";
 
 function formatWhen(when) {
   if (!when) return "";
@@ -15,6 +17,7 @@ export const DisplayPosts = () => {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState("");
+  const toast = useToast();
 
   useEffect(() => {
     let alive = true;
@@ -159,6 +162,16 @@ export const DisplayPosts = () => {
                   <p className="text-aliceblue/95 leading-relaxed whitespace-pre-wrap break-words">
                     {p.text}
                   </p>
+                  <div className="mt-3">
+                    <LikeButton
+                      postId={p.id}
+                      initialLikes={p.likes ?? 0}
+                      initialLikedByMe={p.likedByMe ?? null}
+                      onAuthRequired={() =>
+                        toast.error("Please sign in to like posts")
+                      }
+                    />
+                  </div>
                 </article>
               </li>
             ))}
