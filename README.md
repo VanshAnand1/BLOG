@@ -105,6 +105,7 @@ I have some small changes and features that I would like to add next, including:
 - Editing/Deleting Comments
 - Replying to Comments
 - Blocking Users
+- Profile posts search/filters
 
 ---
 
