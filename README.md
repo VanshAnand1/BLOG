@@ -59,7 +59,7 @@ The tech choices were intentional. As a Computer Science student looking for an 
 ## Journey
 - [Initial Publish](#august-21-2025-initial-publish)
 - [Update 1.00](#august-29-2025-update-1.00)
-- [Bugfix 1.01)(#september-20-2025-bugfix-1.01)
+- [Bugfix 1.01](#september-20-2025-bugfix-1.01)
 
 ### <a id="august-21-2025-initial-publish"></a> August 21, 2025 (initial publish):
 I started by designing the basic page layout and navigation bar for the page. This part was fairly simple as it was just js/html code. 
@@ -100,9 +100,11 @@ Lastly, I changed the cancel button on the add post page to navigate the user to
 There are plenty more features I plan to add, so stay tuned!
 
 ### <a id="september-20-2025-bugfix-1.01"></a> September 20, 2025 (Bugfix 1.01):
-After using BLOG for some time, I found a small but annoying bug with the guest mode feature. Sometimes when you would click the button to use BLOG as a guest, the site would let you in, and then kick you out, requiring you to click the button again. With no error or warning message, this was a pretty bad bug to have, as people who are just trying to view the site would think that it was not working. In addition to fixing this, I also added a small message on the entry pages letting the user know what guest mode entails. 
+After using BLOG for some time, I found a small but annoying bug with the guest mode feature. Sometimes when you would click the button to use BLOG as a guest, the site would let you in, and then kick you out, requiring you to click the button again. With no error or warning message, this was a pretty bad bug to have, as people who are just trying to view the site would think that it was not working. 
 
-I have been busy these past few weeks with applying to jobs and my courses starting, so I have not had as much time to dedicate to this project as I would have liked to. I will still try and push an update/bugfix every once in a while though, so stay posted!
+The fix for this had me searching through form validations, my axios checks, the way I was rendering the initial page and navigation bar, and even how I was calling the api calls through my server. In addition to fixing this, I also added a small message on the entry pages letting the user know what guest mode entails. 
+
+Now, you can enter the site without any issues. I have been busy these past few weeks with applying to jobs and my courses for the Fall semester starting, so I have not had as much time to dedicate to this project. I will still try and push an update/bugfix every once in a while though, so stay posted!
 
 ---
 
