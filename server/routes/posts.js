@@ -10,6 +10,26 @@ router.get("/posts", attachUserIfPresent, async (req, res) => {
   try {
     const meId = req.user?.user_id ?? null;
 
+    // Guests: never reference meId in SQL
+    if (meId == null) {
+      const { rows } = await sg`
+        SELECT
+          p.post_id AS id,
+          u.username AS author,
+          p.post AS text,
+          p.created_at AS "createdAt",
+          p.updated_at AS "updatedAt",
+          (SELECT COUNT(*)::int FROM likes l WHERE l.liked_post = p.post_id) AS "likes",
+          FALSE AS "likedByMe"
+        FROM posts p
+        JOIN users u ON u.user_id = p.post_author
+        ORDER BY COALESCE(p.updated_at, p.created_at) DESC
+        LIMIT 100
+      `;
+      return res.json(rows);
+    }
+
+    // Authed: compute likedByMe with the concrete user id
     const { rows } = await sg`
       SELECT
         p.post_id AS id,
@@ -18,11 +38,9 @@ router.get("/posts", attachUserIfPresent, async (req, res) => {
         p.created_at AS "createdAt",
         p.updated_at AS "updatedAt",
         (SELECT COUNT(*)::int FROM likes l WHERE l.liked_post = p.post_id) AS "likes",
-        (
-          ${meId} IS NOT NULL AND EXISTS (
-            SELECT 1 FROM likes l2
-            WHERE l2.liked_post = p.post_id AND l2.user_id = ${meId}::int
-          )
+        EXISTS (
+          SELECT 1 FROM likes l2
+          WHERE l2.liked_post = p.post_id AND l2.user_id = ${meId}::int
         ) AS "likedByMe"
       FROM posts p
       JOIN users u ON u.user_id = p.post_author
@@ -31,7 +49,7 @@ router.get("/posts", attachUserIfPresent, async (req, res) => {
     `;
     res.json(rows);
   } catch (err) {
-    console.error("GET /posts ERROR:", err);
+    console.error("GET /posts ERROR:", err?.stack || err);
     res.status(500).json({ error: "failed to fetch posts" });
   }
 });
@@ -78,25 +96,42 @@ router.get("/posts/:id", attachUserIfPresent, async (req, res) => {
   try {
     const meId = req.user?.user_id ?? null;
 
-    const postRes = await sg`
-      SELECT
-        p.post_id AS id,
-        COALESCE(u.username, 'anonymous') AS author,
-        p.post AS text,
-        p.created_at AS "createdAt",
-        p.updated_at AS "updatedAt",
-        (SELECT COUNT(*)::int FROM likes l WHERE l.liked_post = p.post_id) AS "likes",
-        (
-          ${meId} IS NOT NULL AND EXISTS (
+    let postRes;
+    if (meId == null) {
+      postRes = await sg`
+        SELECT
+          p.post_id AS id,
+          COALESCE(u.username, 'anonymous') AS author,
+          p.post AS text,
+          p.created_at AS "createdAt",
+          p.updated_at AS "updatedAt",
+          (SELECT COUNT(*)::int FROM likes l WHERE l.liked_post = p.post_id) AS "likes",
+          FALSE AS "likedByMe"
+        FROM posts p
+        LEFT JOIN users u ON u.user_id = p.post_author
+        WHERE p.post_id = ${id}
+        LIMIT 1
+      `;
+    } else {
+      postRes = await sg`
+        SELECT
+          p.post_id AS id,
+          COALESCE(u.username, 'anonymous') AS author,
+          p.post AS text,
+          p.created_at AS "createdAt",
+          p.updated_at AS "updatedAt",
+          (SELECT COUNT(*)::int FROM likes l WHERE l.liked_post = p.post_id) AS "likes",
+          EXISTS (
             SELECT 1 FROM likes l2
             WHERE l2.liked_post = p.post_id AND l2.user_id = ${meId}::int
-          )
-        ) AS "likedByMe"
-      FROM posts p
-      LEFT JOIN users u ON u.user_id = p.post_author
-      WHERE p.post_id = ${id}
-      LIMIT 1
-    `;
+          ) AS "likedByMe"
+        FROM posts p
+        LEFT JOIN users u ON u.user_id = p.post_author
+        WHERE p.post_id = ${id}
+        LIMIT 1
+      `;
+    }
+
     const post = postRes.rows[0];
     if (!post) return res.status(404).json({ error: "Post not found" });
 
@@ -115,7 +150,7 @@ router.get("/posts/:id", attachUserIfPresent, async (req, res) => {
 
     res.json({ post, comments: commentsRes.rows });
   } catch (err) {
-    console.error("GET /posts/:id ERROR:", err);
+    console.error("GET /posts/:id ERROR:", err?.stack || err);
     res.status(500).json({ error: "Server error" });
   }
 });
