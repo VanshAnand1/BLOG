@@ -58,7 +58,8 @@ The tech choices were intentional. As a Computer Science student looking for an 
 
 ## Journey
 - [Initial Publish](#august-21-2025-initial-publish)
-- [Update 1](#august-29-2025-update-1)
+- [Update 1.00](#august-29-2025-update-1.00)
+- [Bugfix 1.01)(#september-20-2025-bugfix-1.01)
 
 ### <a id="august-21-2025-initial-publish"></a> August 21, 2025 (initial publish):
 I started by designing the basic page layout and navigation bar for the page. This part was fairly simple as it was just js/html code. 
@@ -83,7 +84,7 @@ Then, I created different feeds for the main page, letting users decide whether 
 
 Now came hosting. This part took a long time. I started with Supabase for the database. I created a new database and implemented all of the tables that I had on my hosted SQL serer. Next, I moved to Koyeb for my backend. The biggest issue I faced while doing this was updating my SQL database functions to handle PostgresQL (pg) calls instead. After this, the backend was live! Next came Cloudflare for the frontend. After a number of dependency and CORS issues, my website was live, but this was not the end of my work related to hosting. After this, I had to make sure that I could still develop locally on my device without changing all of my database calls manually every time. This involved setting up a check for whether the site was being run on Cloudflare or locally, and then adapting the server calls to the required location. After this, I added mobile support, restyling the elements to work on any screen size. After a few more small design changes (Toasts, time zones, website logo and description), I was ready to call hosting complete. 
 
-### <a id="august-29-2025-update-1"></a> August 29, 2025 (Update 1):
+### <a id="august-29-2025-update-1.00"></a> August 29, 2025 (Update 1.00):
 After showing BLOG to my parents and a few friends, I had received some pieces of feedback. This feedback included changes to the onboarding process, a lack of interaction between users and posts, and just some general bugfixes. 
 
 First, I started with the onboarding changes. This started with centering the buttons and adding a guest mode. The guest mode feature was one that I came up with for an easy introduction to BLOG. The initial requirement to create an account but the burden of action on the user, and when introducing them a new product, the user should not be the one having to do the work. With the addition of guest mode, the user has a way to get an idea of what they are signing themselves up for, and they only have to create an account to perform actions that need a user to point back to (creating posts/comments, liking posts, following users). 
@@ -97,6 +98,11 @@ The biggest feature added in this update was the ability to like posts. Users ca
 Lastly, I changed the cancel button on the add post page to navigate the user to the page they were previously on, and if no such page is found, they are directed to the homepage. 
 
 There are plenty more features I plan to add, so stay tuned!
+
+### <a id="september-20-2025-bugfix-1.01"></a> September 20, 2025 (Bugfix 1.01):
+After using BLOG for some time, I found a small but annoying bug with the guest mode feature. Sometimes when you would click the button to use BLOG as a guest, the site would let you in, and then kick you out, requiring you to click the button again. With no error or warning message, this was a pretty bad bug to have, as people who are just trying to view the site would think that it was not working. In addition to fixing this, I also added a small message on the entry pages letting the user know what guest mode entails. 
+
+I have been busy these past few weeks with applying to jobs and my courses starting, so I have not had as much time to dedicate to this project as I would have liked to. I will still try and push an update/bugfix every once in a while though, so stay posted!
 
 ---
 
