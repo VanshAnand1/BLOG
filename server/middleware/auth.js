@@ -44,8 +44,25 @@ function authRequired(req, res, next) {
   }
 }
 
+/** NEW: attach user if token is valid; otherwise ignore and continue */
+function attachUserIfPresent(req, _res, next) {
+  const hdr = req.headers.authorization || "";
+  const bearer = hdr.startsWith("Bearer ") ? hdr.slice(7) : null;
+  const token = req.cookies?.[COOKIE_NAME] || bearer;
+
+  if (!token) return next();
+  try {
+    const payload = verifyAccessToken(token);
+    req.user = { user_id: payload.sub, username: payload.username };
+  } catch {
+    // ignore bad/missing token in optional mode
+  }
+  return next();
+}
+
 module.exports = {
   authRequired,
+  attachUserIfPresent, // ← export it
   signAccessToken,
   verifyAccessToken,
   cookieOptions,

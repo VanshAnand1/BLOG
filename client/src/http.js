@@ -9,7 +9,7 @@ const axios = axiosLib.create({
 });
 
 // Helper to normalize URL path
-function getPathname(configUrl: string) {
+function getPathname(configUrl) {
   if (!configUrl) return "/";
   try {
     return configUrl.startsWith("http")

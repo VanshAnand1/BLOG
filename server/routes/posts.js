@@ -1,12 +1,12 @@
 // routes/posts.js — migrated from mysql2 to sg (Postgres)
 const express = require("express");
 const { sg } = require("../db");
-const { authRequired } = require("../middleware/auth");
+const { authRequired, attachUserIfPresent } = require("../middleware/auth");
 const router = express.Router();
-const { censor, maskProfanityBody } = require("../utils/profanity");
+const { maskProfanityBody } = require("../utils/profanity");
 
-// List posts
-router.get("/posts", async (req, res) => {
+// List posts (PUBLIC: attaches user if present, never 401)
+router.get("/posts", attachUserIfPresent, async (req, res) => {
   try {
     const meId = req.user?.user_id ?? null;
 
@@ -19,7 +19,7 @@ router.get("/posts", async (req, res) => {
         p.updated_at AS "updatedAt",
         (SELECT COUNT(*)::int FROM likes l WHERE l.liked_post = p.post_id) AS "likes",
         CASE
-          WHEN ${meId}::int IS NULL THEN NULL
+          WHEN ${meId} IS NULL THEN NULL
           ELSE EXISTS (
             SELECT 1 FROM likes l2
             WHERE l2.liked_post = p.post_id AND l2.user_id = ${meId}
@@ -37,6 +37,7 @@ router.get("/posts", async (req, res) => {
   }
 });
 
+// Following feed (PRIVATE)
 router.get("/followingposts", authRequired, async (req, res) => {
   try {
     const me = req.user.user_id;
@@ -69,8 +70,8 @@ router.get("/followingposts", authRequired, async (req, res) => {
   }
 });
 
-// Get one post + comments
-router.get("/posts/:id", async (req, res) => {
+// Get one post + comments (PUBLIC: attaches user if present, never 401)
+router.get("/posts/:id", attachUserIfPresent, async (req, res) => {
   const id = Number(req.params.id);
   if (!Number.isFinite(id))
     return res.status(400).json({ error: "Invalid post id" });
@@ -87,7 +88,7 @@ router.get("/posts/:id", async (req, res) => {
         p.updated_at AS "updatedAt",
         (SELECT COUNT(*)::int FROM likes l WHERE l.liked_post = p.post_id) AS "likes",
         CASE
-          WHEN ${meId}::int IS NULL THEN NULL
+          WHEN ${meId} IS NULL THEN NULL
           ELSE EXISTS (
             SELECT 1 FROM likes l2
             WHERE l2.liked_post = p.post_id AND l2.user_id = ${meId}
@@ -121,7 +122,7 @@ router.get("/posts/:id", async (req, res) => {
   }
 });
 
-// Create post
+// Create post (PRIVATE)
 router.post(
   "/addpost",
   authRequired,
@@ -145,7 +146,7 @@ router.post(
   }
 );
 
-// My posts
+// My posts (PRIVATE)
 router.get("/me/posts", authRequired, async (req, res) => {
   try {
     const me = req.user.user_id;
@@ -173,7 +174,7 @@ router.get("/me/posts", authRequired, async (req, res) => {
   }
 });
 
-// Delete post
+// Delete post (PRIVATE)
 router.delete("/posts/:id", authRequired, async (req, res) => {
   const id = Number(req.params.id);
   if (!Number.isFinite(id))
@@ -196,7 +197,7 @@ router.delete("/posts/:id", authRequired, async (req, res) => {
   }
 });
 
-// Edit post (sets updated_at)
+// Edit post (PRIVATE; sets updated_at)
 router.patch(
   "/posts/:id",
   authRequired,
@@ -244,7 +245,7 @@ router.patch(
   }
 );
 
-// Add comment
+// Add comment (PRIVATE)
 router.post(
   "/addcomment",
   authRequired,
@@ -268,7 +269,7 @@ router.post(
   }
 );
 
-// Like a post
+// Like a post (PRIVATE)
 router.post("/posts/:id/like", authRequired, async (req, res) => {
   const id = Number(req.params.id);
   if (!Number.isFinite(id)) return res.status(400).json({ error: "bad id" });
@@ -291,7 +292,7 @@ router.post("/posts/:id/like", authRequired, async (req, res) => {
   }
 });
 
-// Unlike a post
+// Unlike a post (PRIVATE)
 router.delete("/posts/:id/like", authRequired, async (req, res) => {
   const id = Number(req.params.id);
   if (!Number.isFinite(id)) return res.status(400).json({ error: "bad id" });
@@ -307,6 +308,7 @@ router.delete("/posts/:id/like", authRequired, async (req, res) => {
   }
 });
 
+// Like status (PRIVATE)
 router.get("/posts/:id/like", authRequired, async (req, res) => {
   const id = Number(req.params.id);
   if (!Number.isFinite(id)) return res.status(400).json({ error: "bad id" });
