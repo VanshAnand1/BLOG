@@ -31,6 +31,7 @@ export const SignIn = () => {
     <div className="min-h-screen flex flex-col items-center justify-center px-4 py-8">
       {/* Card */}
       <form
+        noValidate
         onSubmit={submitHandler}
         className="w-full max-w-md rounded-2xl border border-white/10 bg-white/5 shadow-lg p-5 sm:p-6 lg:p-8"
       >
@@ -75,6 +76,10 @@ export const SignIn = () => {
         <div className="flex flex-col sm:flex-row sm:items-center gap-3 justify-center">
           <button
             type="button"
+            onClick={() => {
+              setPassword("");
+              setUsername("");
+            }}
             className="w-full sm:w-auto px-4 py-2 rounded-lg border border-white/15 text-aliceblue hover:bg-white/10 transition"
           >
             Cancel
@@ -97,12 +102,20 @@ export const SignIn = () => {
         </Link>
       </div>
       <div className="w-full max-w-md mt-4 text-center">
-        <Link
-          to={`/home`}
+        <button
+          type="button"
+          onClick={() => navigate("/home")}
           className="inline-block w-full sm:w-auto px-4 py-2 rounded-lg bg-gray-300 text-[#0b1321] font-medium hover:bg-gray-200 transition"
         >
           Continue as a Guest
-        </Link>
+        </button>
+
+        <br></br>
+
+        <p className="text-xs text-aliceblue/70 mt-2 px-2">
+          In 'Guest Mode', you can act as a viewer on the site. To add or like
+          posts, comments, or to follow users, please create an account.
+        </p>
       </div>
     </div>
   );
