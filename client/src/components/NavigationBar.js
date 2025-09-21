@@ -11,10 +11,19 @@ export const NavigationBar = () => {
   const back = encodeURIComponent(pathname + search);
 
   useEffect(() => {
-    api
-      .get("/me")
-      .then((r) => setMe(r.data))
-      .catch(() => setMe(null));
+    let alive = true;
+    (async () => {
+      try {
+        const res = await fetch("/me", { credentials: "include" });
+        if (!alive) return;
+        setMe(res.ok ? await res.json() : null);
+      } catch {
+        if (alive) setMe(null);
+      }
+    })();
+    return () => {
+      alive = false;
+    };
   }, []);
 
   // Close drawer on route change
@@ -126,12 +135,14 @@ export const NavigationBar = () => {
           )}
 
           {/* Logout: visible on desktop, moved into drawer on small */}
-          <button
-            onClick={handleLogout}
-            className="inline-flex items-center h-10 px-3 rounded-lg bg-periwinkle/60 text-[#0b1321] font-medium hover:bg-periwinkle transition max-[950px]:hidden"
-          >
-            Logout
-          </button>
+          {me ? (
+            <button
+              onClick={handleLogout}
+              className="inline-flex items-center h-10 px-3 rounded-lg bg-periwinkle/60 text-[#0b1321] font-medium hover:bg-periwinkle transition max-[950px]:hidden"
+            >
+              Logout
+            </button>
+          ) : null}
 
           {/* Hamburger: only below 950px, at far right */}
           <button
