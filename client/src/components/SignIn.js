@@ -18,6 +18,7 @@ export const SignIn = () => {
     e.preventDefault();
     try {
       await api.post("/signin", { username, password });
+      window.dispatchEvent(new Event("auth:changed"));
       setUsername("");
       setPassword("");
       navigate(from, { replace: true });
