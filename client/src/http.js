@@ -8,19 +8,19 @@ const axios = axiosLib.create({
   withCredentials: true,
 });
 
-// 401 → kick to /signin
-axios.interceptors.response.use(
-  (res) => res,
-  (err) => {
-    const s = err?.response?.status;
-    if (s === 401) {
-      const current = window.location.pathname + window.location.search;
-      if (!current.startsWith("/signin")) {
-        window.location.replace(`/signin?from=${encodeURIComponent(current)}`);
-      }
-    }
-    return Promise.reject(err);
-  }
-);
+// // 401 → kick to /signin
+// axios.interceptors.response.use(
+//   (res) => res,
+//   (err) => {
+//     const s = err?.response?.status;
+//     if (s === 401) {
+//       const current = window.location.pathname + window.location.search;
+//       if (!current.startsWith("/signin")) {
+//         window.location.replace(`/signin?from=${encodeURIComponent(current)}`);
+//       }
+//     }
+//     return Promise.reject(err);
+//   }
+// );
 
 export default axios;
