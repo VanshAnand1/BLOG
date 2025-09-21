@@ -21,22 +21,41 @@ export const DisplayPosts = () => {
 
   useEffect(() => {
     let alive = true;
+
     (async () => {
+      setLoading(true);
+      setErr("");
       try {
-        setLoading(true);
-        setErr("");
         const url = feed === "global" ? "/posts" : "/followingposts";
-        const { data } = await api.get(url);
+
+        // Do not throw on any status code — we decide what to do
+        const res = await api.get(url, { validateStatus: () => true });
+
         if (!alive) return;
-        setPosts(Array.isArray(data) ? data : []);
+
+        if (res.status === 200 && Array.isArray(res.data)) {
+          setPosts(res.data);
+          setErr("");
+        } else if (res.status === 401 && feed === "following") {
+          // Not signed in: auto-switch to Global so the user actually sees posts
+          setFeed("global");
+          return; // let the next effect run
+        } else {
+          const msg =
+            res?.data?.error || `Failed to load (${res.status || "network"})`;
+          setErr(msg);
+          setPosts([]);
+        }
       } catch (e) {
         if (!alive) return;
-        setErr(e?.response?.data?.error || e.message || "Failed to load");
+        const msg = e?.response?.data?.error || e.message || "Failed to load";
+        setErr(msg);
         setPosts([]);
       } finally {
         if (alive) setLoading(false);
       }
     })();
+
     return () => {
       alive = false;
     };
@@ -82,7 +101,7 @@ export const DisplayPosts = () => {
           <div className="text-aliceblue/80">Loading…</div>
         ) : err ? (
           <div className="rounded-2xl border border-red-500/30 bg-red-500/10 p-5 lg:p-6 text-center text-red-200">
-            {err} - please sign in
+            {err}
             {feed === "following" && (
               <div className="mt-3">
                 <button
