@@ -18,13 +18,12 @@ router.get("/posts", attachUserIfPresent, async (req, res) => {
         p.created_at AS "createdAt",
         p.updated_at AS "updatedAt",
         (SELECT COUNT(*)::int FROM likes l WHERE l.liked_post = p.post_id) AS "likes",
-        CASE
-          WHEN ${meId} IS NULL THEN NULL
-          ELSE EXISTS (
+        (
+          ${meId} IS NOT NULL AND EXISTS (
             SELECT 1 FROM likes l2
-            WHERE l2.liked_post = p.post_id AND l2.user_id = ${meId}
+            WHERE l2.liked_post = p.post_id AND l2.user_id = ${meId}::int
           )
-        END AS "likedByMe"
+        ) AS "likedByMe"
       FROM posts p
       JOIN users u ON u.user_id = p.post_author
       ORDER BY COALESCE(p.updated_at, p.created_at) DESC
@@ -87,13 +86,12 @@ router.get("/posts/:id", attachUserIfPresent, async (req, res) => {
         p.created_at AS "createdAt",
         p.updated_at AS "updatedAt",
         (SELECT COUNT(*)::int FROM likes l WHERE l.liked_post = p.post_id) AS "likes",
-        CASE
-          WHEN ${meId} IS NULL THEN NULL
-          ELSE EXISTS (
+        (
+          ${meId} IS NOT NULL AND EXISTS (
             SELECT 1 FROM likes l2
-            WHERE l2.liked_post = p.post_id AND l2.user_id = ${meId}
+            WHERE l2.liked_post = p.post_id AND l2.user_id = ${meId}::int
           )
-        END AS "likedByMe"
+        ) AS "likedByMe"
       FROM posts p
       LEFT JOIN users u ON u.user_id = p.post_author
       WHERE p.post_id = ${id}
