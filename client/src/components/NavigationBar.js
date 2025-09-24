@@ -175,8 +175,104 @@ export const NavigationBar = () => {
           </button>
         </nav>
       </div>
+      <div
+        id="mobile-drawer"
+        className={`hidden max-[950px]:block fixed inset-0 z-[60] overflow-hidden ${
+          menuOpen
+            ? "visible pointer-events-auto"
+            : "invisible pointer-events-none"
+        }`}
+        aria-hidden={!menuOpen}
+      >
+        {/* Backdrop */}
+        <div
+          onClick={() => setMenuOpen(false)}
+          className={`absolute inset-0 bg-black/40 transition-opacity duration-300 ease-out ${
+            menuOpen ? "opacity-100" : "opacity-0"
+          }`}
+        />
 
-      {/* Drawer stays the same as you had */}
+        {/* Panel */}
+        <aside
+          className={`absolute right-0 top-0 h-full w-72 max-w-[85vw] bg-zomp border-l border-white/10 shadow-xl
+                      transition-transform duration-300 ease-in-out will-change-transform
+                      ${menuOpen ? "translate-x-0" : "translate-x-full"}`}
+        >
+          <div className="flex items-center justify-between h-14 px-4 border-b border-white/10">
+            <span className="text-teagreen font-semibold">Menu</span>
+            <button
+              type="button"
+              onClick={() => setMenuOpen(false)}
+              aria-label="Close menu"
+              className="inline-flex items-center h-9 px-2 rounded-md border border-white/10 hover:bg-white/10 transition"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <path d="M6 6l12 12M18 6l-12 12" />
+              </svg>
+            </button>
+          </div>
+
+          <nav className="p-3 flex flex-col gap-2">
+            <Link
+              to="/addpost"
+              onClick={() => setMenuOpen(false)}
+              className="inline-flex items-center h-11 px-3 rounded-lg bg-teagreen/90 text-[#0b1321] font-medium hover:bg-teagreen transition"
+            >
+              <span className="text-lg mr-1">+</span> New
+            </Link>
+
+            <Link
+              to="/profiles/search"
+              onClick={() => setMenuOpen(false)}
+              className="inline-flex items-center h-11 px-3 rounded-lg bg-teagreen/90 text-[#0b1321] font-medium hover:bg-teagreen transition"
+            >
+              User Search
+            </Link>
+
+            {me === undefined ? (
+              <span className="inline-flex items-center h-11 px-3 rounded-lg border border-white/10 text-aliceblue/70">
+                Profile…
+              </span>
+            ) : me ? (
+              <Link
+                to={`/u/${encodeURIComponent(me.username)}`}
+                onClick={() => setMenuOpen(false)}
+                className="inline-flex items-center h-11 px-3 rounded-lg bg-teagreen/90 text-[#0b1321] font-medium hover:bg-teagreen transition"
+              >
+                Profile: {me.username.toUpperCase()}
+              </Link>
+            ) : (
+              <Link
+                to={`/signin?from=${back}`}
+                onClick={() => setMenuOpen(false)}
+                className="inline-flex items-center h-11 px-3 rounded-lg bg-teagreen/90 text-[#0b1321] font-medium hover:bg-teagreen transition"
+              >
+                Sign in
+              </Link>
+            )}
+
+            {/* Logout inside drawer on small screens */}
+            {me ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setMenuOpen(false);
+                  handleLogout();
+                }}
+                className="inline-flex items-center h-11 px-3 rounded-lg bg-periwinkle/70 text-[#0b1321] font-medium hover:bg-periwinkle transition"
+              >
+                Logout
+              </button>
+            ) : null}
+          </nav>
+        </aside>
+      </div>
     </header>
   );
 };
