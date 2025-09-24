@@ -60,6 +60,7 @@ The tech choices were intentional. As a Computer Science student looking for an 
 - [Initial Publish](#august-21-2025-initial-publish)
 - [Update 1.00](#august-29-2025-update-1.00)
 - [Bugfix 1.01](#september-20-2025-bugfix-1.01)
+- [Bugfix 1.02](#september-24-2025-bugfix-1.02)
 
 ### <a id="august-21-2025-initial-publish"></a> August 21, 2025 (initial publish):
 I started by designing the basic page layout and navigation bar for the page. This part was fairly simple as it was just js/html code. 
@@ -105,6 +106,9 @@ After using BLOG for some time, I found a small but annoying bug with the guest 
 The fix for this had me searching through form validations, axios checks, the rendering of the navigation bar and homepage, and even my api calls in my server. It took some time, but the error is now gone and users can enter the site without any issues. In addition to this fix, I also added a small message on the entry pages letting the user know a little information about what they can do in guest mode. 
 
 I have been busy these past few weeks with applying to jobs and my courses for the fall semester, so I have not had as much time to dedicate to this project. I will still try and push an update/bugfix every once in a while though, so stay posted!
+
+### <a id="september-24-2025-bugfix-1.02"></a> September 24, 2025 (Bugfix 1.02):
+After fixing the guest mode bugs, I was made aware that the menu bar would no longer open on any devices where it was visible. Diagnosing the issue was a little tricky, but since this feature was working previously, I navigated to a previous version of BLOG from Github and compared the code to what I had currently. The issue was that the entire menu component was missing, and the fix was just to paste it back in. 
 
 ---
 
