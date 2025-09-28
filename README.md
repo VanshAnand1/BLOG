@@ -3,7 +3,7 @@
 - React JS
 - TailwindCSS
 - Node JS
-- PostgresQL
+- PostgreSQL
 - React DevTools
 - Cloudflare
 - Koyeb
