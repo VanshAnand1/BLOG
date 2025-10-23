@@ -3,15 +3,6 @@ import { useEffect, useState } from "react";
 import api from "../http";
 import { ThumbsUp } from "lucide-react";
 
-/**
- * Props:
- * - postId: number
- * - initialLikes: number
- * - initialLikedByMe: boolean | null
- * - className?: string
- * - onAuthRequired?: () => void
- * - lazyStatus?: boolean  // default true; fetch /posts/:id/like when not already true
- */
 export default function LikeButton({
   postId,
   initialLikes = 0,
@@ -32,7 +23,6 @@ export default function LikeButton({
     setCount(typeof initialLikes === "number" ? initialLikes : 0);
   }, [initialLikes]);
 
-  // ✅ lazy check even when initialLikedByMe is null or false
   useEffect(() => {
     if (!lazyStatus) return;
     if (initialLikedByMe === true) return; // already know it's liked
