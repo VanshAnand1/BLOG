@@ -75,7 +75,7 @@ export function SignUpForm() {
 
   return (
     <div className="flex flex-col gap-6">
-      <Card>
+      <Card className="bg-darkgray">
         <CardHeader>
           <CardTitle className="text-2xl">Sign Up</CardTitle>
           <CardDescription>Create a new account</CardDescription>
@@ -151,48 +151,4 @@ export function SignUpForm() {
       </Card>
     </div>
   );
-}
-{
-  /* <div className="bg-white">
-      <h1>Sign up</h1>
-      <p>Create a new account</p>
-      <form onSubmit={handleSignUp}>
-        <input
-          id="email"
-          type="email"
-          placeholder="email@domain.com"
-          required
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <input
-          id="username"
-          type="text"
-          placeholder="display name"
-          required
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-        />
-        <input
-          id="password"
-          type="password"
-          placeholder="****"
-          required
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        <input
-          id="confirmPassword"
-          type="password"
-          placeholder="****"
-          required
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-        />
-        {error && <p className="text-sm text-red-500">{error}</p>}
-        <button type="submit" disabled={isLoading}>
-          {isLoading ? "Creating account...." : "Sign Up"}
-        </button>
-      </form>
-    </div> */
 }

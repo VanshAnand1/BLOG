@@ -4,7 +4,7 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
+    --background: 0 100% 100%;
     --foreground: 0 0% 3.9%;
     --card: 0 0% 100%;
     --card-foreground: 0 0% 3.9%;
@@ -24,6 +24,9 @@
     --input: 0 0% 89.8%;
     --ring: 0 0% 3.9%;
     --chart-1: 12 76% 61%;
+    /* gradient stops (H S L values) */
+    --bg-1: 210 100% 98%;
+    --bg-2: 260 100% 98%;
     --chart-2: 173 58% 39%;
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
@@ -31,7 +34,11 @@
     --radius: 0.5rem;
   }
   .dark {
-    --background: 0 0% 3.9%;
+    --background: radial-gradient(
+      circle at center,
+      rgba(255, 255, 255, 1) 0%,
+      rgb(50, 50, 50) 100%
+    );
     --foreground: 0 0% 98%;
     --card: 0 0% 3.9%;
     --card-foreground: 0 0% 98%;
@@ -47,6 +54,9 @@
     --accent-foreground: 0 0% 98%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
+    /* dark gradient stops */
+    --bg-1: 220 14% 8%;
+    --bg-2: 260 6% 12%;
     --border: 0 0% 14.9%;
     --input: 0 0% 14.9%;
     --ring: 0 0% 83.1%;
@@ -63,6 +73,13 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    background-color: hsl(var(--background));
+    background-image: linear-gradient(
+      135deg,
+      hsl(var(--bg-1)),
+      hsl(var(--bg-2))
+    );
+    background-attachment: fixed;
+    @apply text-foreground;
   }
 }
