@@ -11,6 +11,19 @@ export default {
   theme: {
     extend: {
       colors: {
+        darkgray: "#30323D",
+        lightgray: "#4D5061",
+        blue: "#5C80BC",
+        ashgray: "#CDD1C4",
+        teagreen: "#C5E6A6",
+        aliceblue: "#D9F0FF",
+        magnolia: "#F8F0FB",
+        zomp: "#619B8A",
+        sunset: "#F2D0A4",
+        aquamarine: "#A6F4DC",
+        tropicalindigo: "#A288E3",
+        seagreen: "#388659",
+        periwinkle: "#A7ABDD",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         card: {
@@ -59,5 +72,4 @@ export default {
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
 } satisfies Config;
