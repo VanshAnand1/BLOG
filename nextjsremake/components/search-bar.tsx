@@ -41,7 +41,7 @@ export default function SearchBar() {
         </div>
         <button
           type="submit"
-          className="h-10 px-4 rounded-r-xl bg-teagreen/60 text-[#0b1321] font-medium hover:bg-teagreen/80 transition"
+          className="h-10 px-4 rounded-r-xl bg-teagreen font-bold text-[#0b1321] hover:bg-teagreen/80 transition"
         >
           Search
         </button>

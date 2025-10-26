@@ -1,32 +1,40 @@
 import { ThemeSwitcher } from "@/components/template/theme-switcher";
 import SearchBar from "@/components/search-bar";
 import Link from "next/link";
-
+import LogoutButton from "@/components/logout-button";
 export default function ProtectedLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
-    <main className="min-h-screen flex flex-col items-center">
-      <div className="flex items-center justify-between gap-6 p-2 bg-zomp/50 w-full">
-        <div className="flex justify-between px-6 gap-10 items-center">
-          <Link href="/">BLOG</Link>
-          <SearchBar />
+    <main className="min-h-screen flex flex-col w-full">
+      <div className="flex items-center justify-between gap-2 p-2 bg-zomp/50 w-full">
+        <div className="flex justify-between px-6 gap-10 items-center flex-1 min-w-0">
+          <Link
+            href="/"
+            className="bg-teagreen rounded-2xl py-2 text-black px-4 font-bold"
+          >
+            BLOG
+          </Link>
+          <div className="flex-1 min-w-0">
+            <SearchBar />
+          </div>
         </div>
-        <div className="flex justify-between px-6 gap-10 items-center">
+        <div className="flex justify-between px-2 gap-6 items-center shrink-0">
           <Link
             href="/posts/new"
-            className="bg-teagreen/80 text-black rounded-2xl py-2 px-3"
+            className="bg-teagreen text-black rounded-2xl py-2 px-4 font-bold"
           >
             + New Post
           </Link>
           <Link
             href="/profiles"
-            className="bg-teagreen/80 text-black rounded-2xl py-2 px-3"
+            className="bg-teagreen text-black rounded-2xl py-2 px-4 font-bold"
           >
             Profile
           </Link>
+          <LogoutButton />
           <ThemeSwitcher />
         </div>
       </div>

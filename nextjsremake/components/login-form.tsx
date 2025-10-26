@@ -100,7 +100,7 @@ export function LoginForm() {
                   href="/auth/sign-up"
                   className="p-2 rounded-2xl bg-lightgray hover:underline"
                 >
-                  Sign In Instead
+                  Sign Up Instead
                 </Link>
               </div>
             </div>
