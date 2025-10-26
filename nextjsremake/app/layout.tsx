@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "next-themes";
+import StarField from "@/components/starfield";
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
@@ -26,14 +27,22 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${geistSans.className} antialiased`}>
+      <body className={`${geistSans.className} antialiased relative`}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
           enableSystem
           disableTransitionOnChange
         >
-          {children}
+          <StarField
+            spawnStrategy="rain"
+            speed="slow"
+            colorMode="custom"
+            customColors={["#fff", "#9ca3af"]}
+            twinkle={true}
+            cursorReactive={true}
+          />
+          <div className="relative z-10">{children}</div>
         </ThemeProvider>
       </body>
     </html>

@@ -9,11 +9,11 @@ export default function ProtectedLayout({
 }) {
   return (
     <main className="min-h-screen flex flex-col w-full">
-      <div className="flex items-center justify-between gap-2 p-2 dark:bg-zomp/50 w-full">
+      <div className="flex items-center justify-between gap-2 p-2 bg-teagreen dark:bg-zomp w-full">
         <div className="flex justify-between px-6 gap-10 items-center flex-1 min-w-0">
           <Link
             href="/"
-            className="dark:bg-teagreen rounded-2xl py-2 dark:text-black px-4 font-bold"
+            className="text-white dark:hover:bg-teagreen/80 dark:bg-teagreen rounded-2xl py-2 dark:text-black px-4 font-bold bg-zomp hover:bg-zomp/80"
           >
             BLOG
           </Link>
@@ -24,13 +24,13 @@ export default function ProtectedLayout({
         <div className="flex justify-between px-2 gap-6 items-center shrink-0">
           <Link
             href="/posts/new"
-            className="dark:bg-teagreen dark:text-black rounded-2xl py-2 px-4 font-bold"
+            className="dark:bg-teagreen dark:text-black rounded-2xl py-2 px-4 font-bold bg-zomp hover:bg-zomp/80 text-white dark:hover:bg-teagreen/80"
           >
             + New Post
           </Link>
           <Link
             href="/profiles"
-            className="dark:bg-teagreen dark:text-black rounded-2xl py-2 px-4 font-bold"
+            className="dark:bg-teagreen dark:text-black rounded-2xl py-2 px-4 font-bold text-white dark:hover:bg-teagreen/80 bg-zomp hover:bg-zomp/80"
           >
             Profile
           </Link>

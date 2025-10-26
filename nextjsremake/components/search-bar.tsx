@@ -17,7 +17,7 @@ export default function SearchBar() {
         <div className="relative flex-1">
           <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center">
             <svg
-              className="h-5 w-5 dark:text-black/60"
+              className="h-5 w-5 dark:text-black/60 text-white/60"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -41,7 +41,7 @@ export default function SearchBar() {
         </div>
         <button
           type="submit"
-          className="h-10 px-4 rounded-r-xl dark:bg-teagreen font-bold text-[#0b1321] dark:hover:bg-teagreen/80 transition"
+          className="text-white dark:text-black h-10 px-4 rounded-r-xl dark:bg-teagreen font-bold dark:hover:bg-teagreen/80 transition bg-zomp hover:bg-zomp/80"
         >
           Search
         </button>
