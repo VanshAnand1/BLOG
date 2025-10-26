@@ -17,7 +17,7 @@ export default function SearchBar() {
         <div className="relative flex-1">
           <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center">
             <svg
-              className="h-5 w-5 text-black/60"
+              className="h-5 w-5 dark:text-black/60"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -33,7 +33,7 @@ export default function SearchBar() {
             id="search"
             placeholder="Search..."
             value={searchQuery}
-            className="w-full h-10 rounded-l-xl bg-neutral-500 text-white placeholder-white/50 pl-10 pr-3 border border-white/10 focus:outline-none focus:ring-2 focus:ring-teagreen focus:border-transparent"
+            className="w-full h-10 rounded-l-xl bg-neutral-500 text-white placeholder-white/50 pl-10 pr-3 border border-white/10 focus:outline-none focus:ring-2 dark:focus:ring-teagreen focus:border-transparent"
             onChange={(e) => {
               setSearchQuery(e.target.value);
             }}
@@ -41,7 +41,7 @@ export default function SearchBar() {
         </div>
         <button
           type="submit"
-          className="h-10 px-4 rounded-r-xl bg-teagreen font-bold text-[#0b1321] hover:bg-teagreen/80 transition"
+          className="h-10 px-4 rounded-r-xl dark:bg-teagreen font-bold text-[#0b1321] dark:hover:bg-teagreen/80 transition"
         >
           Search
         </button>
