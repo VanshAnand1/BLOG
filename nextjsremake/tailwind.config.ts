@@ -13,6 +13,7 @@ export default {
       colors: {
         darkgray: "#30323D",
         lightgray: "#4D5061",
+        mediumgray: "#31323d",
         blue: "#5C80BC",
         ashgray: "#CDD1C4",
         teagreen: "#C5E6A6",
