@@ -142,7 +142,13 @@ export function SignUpForm() {
                   </Button>
                 </div>
                 <div>
-                  Already have an account? <Link href="/auth/login">Login</Link>
+                  Already have an account?{" "}
+                  <Link
+                    href="/auth/login"
+                    className="p-2 rounded-2xl bg-lightgray hover:underline"
+                  >
+                    Login Instead
+                  </Link>
                 </div>
               </div>
             </div>
