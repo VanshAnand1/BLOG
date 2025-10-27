@@ -5,6 +5,13 @@ import { useState } from "react";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Button } from "./ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/template/ui/card";
 
 export default function NewPostForm() {
   const supabase = createClient();
@@ -41,36 +48,64 @@ export default function NewPostForm() {
   };
 
   return (
-    <div>
-      <form onSubmit={handleNewPost}>
-        <Label htmlFor="title">Title</Label>
-        <Input
-          id="title"
-          value={title}
-          onChange={(e) => {
-            setTitle(e.target.value);
-          }}
-        />
-        <Label htmlFor="content">Content</Label>
-        <Input
-          id="content"
-          value={content}
-          onChange={(e) => {
-            setContent(e.target.value);
-          }}
-        />
-        <Label htmlFor="footer">Footer (optional)</Label>
-        <Input
-          id="footer"
-          value={footer}
-          onChange={(e) => {
-            setFooter(e.target.value);
-          }}
-        />
-        <Button type="submit" disabled={isLoading}>
-          {isLoading ? "Creating post...." : "Create Post"}
-        </Button>
-      </form>
+    <div className="flex flex-col gap-6">
+      <Card className="bg-darkgray">
+        <CardHeader>
+          <CardTitle className="text-2xl">New Post</CardTitle>
+          <CardDescription>What&apos;s on your mind?</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleNewPost}>
+            <div className="flex flex-col gap-6">
+              <div className="grid gap-2">
+                <Label htmlFor="title">Title</Label>
+                <Input
+                  id="title"
+                  type="text"
+                  placeholder="Big things have happened..."
+                  required
+                  value={title}
+                  onChange={(e) => {
+                    setTitle(e.target.value);
+                  }}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="content">Post Content</Label>
+                <textarea
+                  id="content"
+                  rows={8}
+                  className="flex w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                  placeholder="You would never believe...."
+                  required
+                  value={content}
+                  onChange={(e) => {
+                    setContent(e.target.value);
+                  }}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="footer">Footer (optional)</Label>
+                <textarea
+                  id="footer"
+                  rows={4}
+                  className="flex w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                  placeholder="in short..."
+                  value={footer}
+                  onChange={(e) => {
+                    setFooter(e.target.value);
+                  }}
+                />
+              </div>
+              <div>
+                <Button type="submit" disabled={isLoading}>
+                  {isLoading ? "Creating post...." : "Create Post"}
+                </Button>
+              </div>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   );
 }

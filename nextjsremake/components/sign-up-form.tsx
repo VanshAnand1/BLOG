@@ -71,7 +71,7 @@ export function SignUpForm() {
       return;
     }
     setIsMatching(password === confirmPassword);
-  }, [password, confirmPassword]); // Eff
+  }, [password, confirmPassword]);
 
   return (
     <div className="flex flex-col gap-6">
