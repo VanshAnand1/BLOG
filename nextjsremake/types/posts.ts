@@ -11,6 +11,7 @@ export type PostSchema = {
   footer?: string | null;
   created_at?: string | null;
   updated_at?: string | null;
+  likes_count: number;
   author?: ProfileMini | null;
 };
 

@@ -23,7 +23,7 @@ export default async function Posts() {
   const { data: posts, error } = await supabase
     .from("posts")
     .select(
-      "id, author_id, title, content, footer, created_at, updated_at, author:profiles(display_name, avatar_url)"
+      "id, author_id, title, content, footer, created_at, updated_at, likes_count, author:profiles!posts_author_id_fkey(display_name, avatar_url)"
     )
     .order("created_at", { ascending: false })
     .limit(50);
@@ -38,12 +38,29 @@ export default async function Posts() {
 
   const postsTyped = posts as PostWithAuthor[];
   const currentUserId = user?.id ?? "";
+  const postIds = postsTyped.map((post) => post.id);
+  let likedPostIds = new Set<string>();
+
+  if (user && postIds.length > 0) {
+    const { data: likes, error: likesError } = await supabase
+      .from("likes")
+      .select("post_id")
+      .eq("user_id", user.id)
+      .in("post_id", postIds);
+
+    if (likesError) {
+      return <div>there was an error {likesError.message}</div>;
+    }
+
+    likedPostIds = new Set(likes?.map((like) => like.post_id));
+  }
 
   return (
     <div className="flex flex-col gap-6 items-stretch">
       {postsTyped.map((post) => {
         const displayName = post.author?.display_name ?? post.author_id;
         const avatarUrl = post.author?.avatar_url ?? null;
+        const likedByMe = likedPostIds.has(post.id);
 
         return (
           <article key={post.id} className="mx-auto w-full max-w-6xl">
@@ -96,8 +113,8 @@ export default async function Posts() {
                 ""
               )}
               <PostsCardLikeButton
-                liked={true}
-                likeCount={50002312}
+                liked={likedByMe}
+                likeCount={post.likes_count}
               ></PostsCardLikeButton>
             </PostsCard>
           </article>
