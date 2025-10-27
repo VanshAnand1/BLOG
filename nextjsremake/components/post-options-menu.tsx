@@ -9,6 +9,7 @@ import {
 import { Button } from "./ui/button";
 import { MoreHorizontal } from "lucide-react";
 import { useDeletePost } from "./delete-option";
+import { useState } from "react";
 
 type PostOptionsMenuProps = {
   postId: string;
@@ -26,6 +27,7 @@ export default function PostOptionsMenu({
     authorId,
     currentUserId,
   });
+  const [isCopied, setIsCopied] = useState(false);
 
   if (!currentUserId || !authorId || currentUserId !== authorId) {
     return null;
@@ -33,7 +35,11 @@ export default function PostOptionsMenu({
 
   return (
     <div className="flex items-center gap-2">
-      <DropdownMenu>
+      <DropdownMenu
+        onOpenChange={(open) => {
+          if (!open) setIsCopied(false);
+        }}
+      >
         <DropdownMenuTrigger asChild>
           <Button
             variant="ghost"
@@ -45,6 +51,17 @@ export default function PostOptionsMenu({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
+          <DropdownMenuItem
+            onSelect={(event) => {
+              event.preventDefault();
+              // update link here
+              //toast555
+              navigator.clipboard.writeText(`localhost:3000/posts/${postId}`);
+              setIsCopied(true);
+            }}
+          >
+            {isCopied ? "Copied Link!" : "Share Post"}
+          </DropdownMenuItem>
           <DropdownMenuItem
             onSelect={(event) => {
               if (isDeleting) {
