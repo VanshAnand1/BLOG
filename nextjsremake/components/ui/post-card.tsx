@@ -59,7 +59,7 @@ const PostsCardContent = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => (
-  <div ref={ref} className={cn("py-6", className)} {...props} />
+  <div ref={ref} className={cn("py-2", className)} {...props} />
 ));
 PostsCardContent.displayName = "PostsCardContent";
 

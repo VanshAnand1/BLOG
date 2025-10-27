@@ -25,6 +25,11 @@ export default {
         tropicalindigo: "#A288E3",
         seagreen: "#388659",
         periwinkle: "#A7ABDD",
+        mint: "#03b2a6",
+        navy: "#2B3A42",
+        lightgreen: "#A8E6CF",
+        redorange: "#f0ad59",
+        lightredorange: "#edc28c",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         card: {
