@@ -2,6 +2,7 @@ import { ThemeSwitcher } from "@/components/theme-switcher";
 import SearchBar from "@/components/search-bar";
 import Link from "next/link";
 import LogoutButton from "@/components/logout-button";
+import ProfileButton from "@/components/profile-button";
 export default function ProtectedLayout({
   children,
 }: {
@@ -28,12 +29,7 @@ export default function ProtectedLayout({
           >
             + New Post
           </Link>
-          <Link
-            href="/profiles"
-            className="dark:bg-teagreen/80 dark:text-black rounded-2xl py-2 px-4 font-bold text-white dark:hover:bg-teagreen bg-navy/80 hover:bg-navy/60"
-          >
-            Profile
-          </Link>
+          <ProfileButton />
           <LogoutButton />
           <ThemeSwitcher />
         </div>
