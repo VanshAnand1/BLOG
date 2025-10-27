@@ -1,31 +1,34 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { Button } from "./ui/button";
 import { createClient } from "@/lib/supabase/client";
 
 type DeleteOptionProps = {
-  post_id: string;
-  author_id: string | null | undefined;
-  current_user: string;
+  postId: string;
+  authorId: string | null | undefined;
+  currentUserId: string;
 };
 
-export default function DeleteOption({
-  post_id,
-  author_id,
-  current_user,
-}: DeleteOptionProps) {
+type UseDeletePostArgs = DeleteOptionProps;
+
+export function useDeletePost({
+  postId,
+  authorId,
+  currentUserId,
+}: UseDeletePostArgs) {
   const router = useRouter();
   const pathname = usePathname();
   const [isDeleting, setIsDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  if (!current_user || !author_id || current_user !== author_id) {
-    return null;
-  }
+  const deletePost = useCallback(async () => {
+    if (!currentUserId || !authorId || currentUserId !== authorId) {
+      setError("You are not allowed to delete this post.");
+      return;
+    }
 
-  const handleDelete = async () => {
     setError(null);
     setIsDeleting(true);
 
@@ -35,7 +38,7 @@ export default function DeleteOption({
         data: { user },
       } = await supabase.auth.getUser();
 
-      if (!user || user.id !== author_id) {
+      if (!user || user.id !== authorId) {
         setError("You are not allowed to delete this post.");
         return;
       }
@@ -43,8 +46,8 @@ export default function DeleteOption({
       const { data: deletedRow, error: deleteError } = await supabase
         .from("posts")
         .delete()
-        .eq("id", post_id)
-        .eq("author_id", author_id)
+        .eq("id", postId)
+        .eq("author_id", authorId)
         .select("id")
         .maybeSingle();
 
@@ -58,7 +61,7 @@ export default function DeleteOption({
         return;
       }
 
-      if (pathname === `/posts/${post_id}`) {
+      if (pathname === `/posts/${postId}`) {
         router.push("/posts");
       } else {
         router.refresh();
@@ -70,14 +73,28 @@ export default function DeleteOption({
     } finally {
       setIsDeleting(false);
     }
-  };
+  }, [authorId, currentUserId, pathname, postId, router]);
+
+  return { deletePost, isDeleting, error };
+}
+
+export default function DeleteOption(props: DeleteOptionProps) {
+  const { deletePost, isDeleting, error } = useDeletePost(props);
+
+  if (
+    !props.currentUserId ||
+    !props.authorId ||
+    props.currentUserId !== props.authorId
+  ) {
+    return null;
+  }
 
   return (
     <div className="flex items-center gap-2">
       <Button
         variant="destructive"
         size="sm"
-        onClick={handleDelete}
+        onClick={deletePost}
         disabled={isDeleting}
       >
         {isDeleting ? "Deleting..." : "Delete"}

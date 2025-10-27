@@ -12,7 +12,7 @@ import { PostWithAuthor } from "@/types/posts";
 import Link from "next/link";
 import Image from "next/image";
 import { datetime } from "@/lib/datetime";
-import DeleteOption from "@/components/delete-option";
+import PostOptionsMenu from "@/components/post-options-menu";
 
 export default async function Posts() {
   const supabase = await createClient();
@@ -44,9 +44,6 @@ export default async function Posts() {
         const displayName = post.author?.display_name ?? post.author_id;
         const avatarUrl = post.author?.avatar_url ?? null;
 
-        const isAuthor =
-          currentUserId !== "" && currentUserId === post.author_id;
-
         return (
           <article key={post.id} className="mx-auto w-full max-w-6xl">
             <PostsCard>
@@ -65,13 +62,11 @@ export default async function Posts() {
                     ) : (
                       ""
                     )}
-                    {isAuthor ? (
-                      <DeleteOption
-                        post_id={post.id}
-                        author_id={post.author_id}
-                        current_user={currentUserId}
-                      />
-                    ) : null}
+                    <PostOptionsMenu
+                      postId={post.id}
+                      authorId={post.author_id}
+                      currentUserId={currentUserId}
+                    />
                   </div>
                 </div>
                 <Link href={`/profiles/$${post.author_id}`}>
