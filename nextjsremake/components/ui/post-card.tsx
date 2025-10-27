@@ -8,7 +8,7 @@ const PostsCard = React.forwardRef<
   <div
     ref={ref}
     className={cn(
-      "rounded-xl px-6 border dark:bg-periwinkle bg-sunset text-card-foreground shadow",
+      "rounded-xl px-6 border dark:bg-periwinkle bg-periwinkle text-card-foreground shadow",
       className
     )}
     {...props}
@@ -49,7 +49,7 @@ const PostsCardAuthor = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("py-1 text-sm hover:underline", className)}
+    className={cn("mb-1 text-sm hover:underline", className)}
     {...props}
   />
 ));
@@ -59,7 +59,7 @@ const PostsCardContent = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => (
-  <div ref={ref} className={cn("py-2", className)} {...props} />
+  <div ref={ref} className={cn("py-2 pb-6", className)} {...props} />
 ));
 PostsCardContent.displayName = "PostsCardContent";
 
@@ -81,7 +81,7 @@ const PostsCardFooter = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("flex items-center py-6 text-black", className)}
+    className={cn("flex items-center pb-6 pt-4 text-black", className)}
     {...props}
   />
 ));

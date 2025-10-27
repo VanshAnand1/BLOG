@@ -49,10 +49,12 @@ export default function NewPostForm() {
 
   return (
     <div className="flex flex-col gap-6">
-      <Card className="bg-darkgray">
+      <Card className="bg-periwinkle text-black">
         <CardHeader>
           <CardTitle className="text-2xl">New Post</CardTitle>
-          <CardDescription>What&apos;s on your mind?</CardDescription>
+          <CardDescription className="text-black">
+            What&apos;s on your mind?
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleNewPost}>
@@ -62,6 +64,7 @@ export default function NewPostForm() {
                 <Input
                   id="title"
                   type="text"
+                  className="border-black placeholder:text-lightgray"
                   placeholder="Big things have happened..."
                   required
                   value={title}
@@ -75,7 +78,7 @@ export default function NewPostForm() {
                 <textarea
                   id="content"
                   rows={8}
-                  className="flex w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                  className="flex w-full rounded-md border border-black bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm placeholder:text-lightgray"
                   placeholder="You would never believe...."
                   required
                   value={content}
@@ -89,8 +92,8 @@ export default function NewPostForm() {
                 <textarea
                   id="footer"
                   rows={4}
-                  className="flex w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
-                  placeholder="in short..."
+                  className="flex w-full rounded-md border border-black bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm placeholder:text-lightgray"
+                  placeholder="In short..."
                   value={footer}
                   onChange={(e) => {
                     setFooter(e.target.value);
