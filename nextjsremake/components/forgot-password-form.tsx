@@ -8,10 +8,10 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/template/ui/card";
-import { Button } from "@/components/template/ui/button";
-import { Input } from "@/components/template/ui/input";
-import { Label } from "@/components/template/ui/label";
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import Link from "next/link";
 
 export function ForgotPasswordForm() {
@@ -44,23 +44,29 @@ export function ForgotPasswordForm() {
   return (
     <div className="flex flex-col gap-6">
       {success ? (
-        <Card className="bg-darkgray">
+        <Card className="bg-periwinkle">
           <CardHeader>
-            <CardTitle className="text-2xl">Check Your Email</CardTitle>
-            <CardDescription>Password reset instructions sent</CardDescription>
+            <CardTitle className="text-2xl text-black">
+              Check Your Email
+            </CardTitle>
+            <CardDescription className="text-black">
+              Password reset instructions sent
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-black">
               If you registered using your email and password, you will receive
               a password reset email.
             </p>
           </CardContent>
         </Card>
       ) : (
-        <Card className="bg-darkgray">
+        <Card className="bg-periwinkle">
           <CardHeader>
-            <CardTitle className="text-2xl">Reset Your Password</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-2xl text-black">
+              Reset Your Password
+            </CardTitle>
+            <CardDescription className="text-black">
               Type in your email and we&apos;ll send you a link to reset your
               password
             </CardDescription>
@@ -69,11 +75,14 @@ export function ForgotPasswordForm() {
             <form onSubmit={handleForgotPassword}>
               <div className="flex flex-col gap-6">
                 <div className="grid gap-2">
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="email" className="text-black">
+                    Email
+                  </Label>
                   <Input
                     id="email"
                     type="email"
                     placeholder="m@example.com"
+                    className="border-black placeholder:text-lightgray"
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -84,11 +93,11 @@ export function ForgotPasswordForm() {
                   {isLoading ? "Sending..." : "Send reset email"}
                 </Button>
               </div>
-              <div className="mt-4 text-center text-sm">
+              <div className="mt-4 text-center text-sm text-black">
                 Already have an account?{" "}
                 <Link
                   href="/auth/login"
-                  className="p-2 rounded-2xl bg-lightgray hover:underline"
+                  className="p-2 rounded-2xl bg-sunset hover:underline"
                 >
                   Login Instead
                 </Link>

@@ -10,10 +10,10 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/template/ui/card";
-import { Input } from "@/components/template/ui/input";
-import { Label } from "@/components/template/ui/label";
-import { Button } from "@/components/template/ui/button";
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
 export function LoginForm() {
@@ -47,20 +47,25 @@ export function LoginForm() {
 
   return (
     <div className="flex flex-col gap-6">
-      <Card className="bg-darkgray">
+      <Card className="bg-periwinkle">
         <CardHeader>
-          <CardTitle className="text-2xl">Log in</CardTitle>
-          <CardDescription>Log in with your email and password</CardDescription>
+          <CardTitle className="text-2xl dark:text-black">Log in</CardTitle>
+          <CardDescription className="text-black">
+            Log in with your email and password
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleLogin}>
             <div className="flex flex-col gap-5">
               <div className="grid gap-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email" className="dark:text-black">
+                  Email
+                </Label>
                 <Input
                   id="email"
                   type="email"
                   placeholder="email@example.com"
+                  className="placeholder:text-lightgray border-black dark:text-black"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -69,10 +74,12 @@ export function LoginForm() {
 
               <div className="grid gap-2">
                 <div className="flex items-center">
-                  <Label htmlFor="password">Password</Label>
+                  <Label htmlFor="password" className="dark:text-black">
+                    Password
+                  </Label>
                   <Link
                     href="/auth/forgot-password"
-                    className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
+                    className="ml-auto dark:text-black inline-block text-sm underline-offset-4 hover:underline"
                   >
                     Forgot your password?
                   </Link>
@@ -81,6 +88,7 @@ export function LoginForm() {
                   id="password"
                   type="password"
                   placeholder="**********"
+                  className="placeholder:text-lightgray border-black dark:text-black"
                   required
                   value={password}
                   onChange={(e) => {
@@ -94,11 +102,11 @@ export function LoginForm() {
                   {isLoading ? "Finding account...." : "Log In"}
                 </Button>
               </div>
-              <div>
+              <div className="dark:text-black">
                 Don&apos;t have an account?{" "}
                 <Link
                   href="/auth/sign-up"
-                  className="p-2 rounded-2xl bg-lightgray hover:underline"
+                  className="p-2 rounded-2xl bg-sunset dark:text-black hover:underline"
                 >
                   Sign Up Instead
                 </Link>

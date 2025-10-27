@@ -1,16 +1,16 @@
 "use client";
 
 import { createClient } from "@/lib/supabase/client";
-import { Button } from "@/components/template/ui/button";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/template/ui/card";
-import { Input } from "@/components/template/ui/input";
-import { Label } from "@/components/template/ui/label";
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -39,9 +39,11 @@ export function UpdatePasswordForm() {
 
   return (
     <div className="flex flex-col gap-6">
-      <Card className="bg-darkgray">
+      <Card className="bg-periwinkle">
         <CardHeader>
-          <CardTitle className="text-2xl">Reset Your Password</CardTitle>
+          <CardTitle className="text-2xl text-black">
+            Reset Your Password
+          </CardTitle>
           <CardDescription>
             Please enter your new password below.
           </CardDescription>

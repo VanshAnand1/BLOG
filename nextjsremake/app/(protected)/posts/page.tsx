@@ -12,9 +12,13 @@ import { PostWithAuthor } from "@/types/posts";
 import Link from "next/link";
 import Image from "next/image";
 import { datetime } from "@/lib/datetime";
+import DeleteOption from "@/components/delete-option";
 
 export default async function Posts() {
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   const { data: posts, error } = await supabase
     .from("posts")
     .select(
@@ -24,7 +28,7 @@ export default async function Posts() {
     .limit(50);
 
   if (error) {
-    return <div>there was an error {error?.message} </div>;
+    return <div>there was an error {error?.message}</div>;
   }
 
   if (!posts || posts.length === 0) {
@@ -32,12 +36,16 @@ export default async function Posts() {
   }
 
   const postsTyped = posts as PostWithAuthor[];
+  const currentUserId = user?.id ?? "";
 
   return (
     <div className="flex flex-col gap-6 items-stretch">
       {postsTyped.map((post) => {
         const displayName = post.author?.display_name ?? post.author_id;
         const avatarUrl = post.author?.avatar_url ?? null;
+
+        const isAuthor =
+          currentUserId !== "" && currentUserId === post.author_id;
 
         return (
           <article key={post.id} className="mx-auto w-full max-w-6xl">
@@ -47,7 +55,7 @@ export default async function Posts() {
                   <Link href={`/posts/${post.id}`} className="text-2xl pt-3">
                     <PostsCardTitle>{post.title}</PostsCardTitle>
                   </Link>
-                  <div>
+                  <div className="flex items-center gap-3">
                     {datetime(post.created_at)}
                     {"  "}
                     {post.updated_at ? (
@@ -57,6 +65,13 @@ export default async function Posts() {
                     ) : (
                       ""
                     )}
+                    {isAuthor ? (
+                      <DeleteOption
+                        postId={post.id}
+                        authorId={post.author_id}
+                        currentUserId={currentUserId}
+                      />
+                    ) : null}
                   </div>
                 </div>
                 <Link href={`/profiles/$${post.author_id}`}>

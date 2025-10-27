@@ -10,10 +10,10 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/template/ui/card";
-import { Input } from "@/components/template/ui/input";
-import { Label } from "@/components/template/ui/label";
-import { Button } from "@/components/template/ui/button";
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
 export function SignUpForm() {
@@ -75,42 +75,53 @@ export function SignUpForm() {
 
   return (
     <div className="flex flex-col gap-6">
-      <Card className="bg-darkgray">
+      <Card className="bg-periwinkle">
         <CardHeader>
-          <CardTitle className="text-2xl">Sign Up</CardTitle>
-          <CardDescription>Create a new account</CardDescription>
+          <CardTitle className="text-2xl dark:text-black">Sign Up</CardTitle>
+          <CardDescription className="text-black">
+            Create a new account
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSignUp}>
             <div className="flex flex-col gap-5">
               <div className="grid gap-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email" className="text-black">
+                  Email
+                </Label>
                 <Input
                   id="email"
                   type="email"
                   placeholder="email@example.com"
+                  className="placeholder:text-lightgray border-black"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="displayName">Display Name</Label>
+                <Label htmlFor="displayName" className="text-black">
+                  Display Name
+                </Label>
                 <Input
                   id="displayName"
                   type="text"
                   placeholder="Display Name"
+                  className="placeholder:text-lightgray border-black"
                   required
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password" className="text-black">
+                  Password
+                </Label>
                 <Input
                   id="password"
                   type="password"
                   placeholder="**********"
+                  className="placeholder:text-lightgray border-black"
                   required
                   value={password}
                   onChange={(e) => {
@@ -119,11 +130,14 @@ export function SignUpForm() {
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="confirmPassword">Confirm Password</Label>
+                <Label htmlFor="confirmPassword" className="text-black">
+                  Confirm Password
+                </Label>
                 <Input
                   id="confirmPassword"
                   type="password"
                   placeholder="**********"
+                  className="placeholder:text-lightgray border-black"
                   required
                   value={confirmPassword}
                   onChange={(e) => {
@@ -141,11 +155,11 @@ export function SignUpForm() {
                     {isLoading ? "Creating account...." : "Sign Up"}
                   </Button>
                 </div>
-                <div>
+                <div className="text-black">
                   Already have an account?{" "}
                   <Link
                     href="/auth/login"
-                    className="p-2 rounded-2xl bg-lightgray hover:underline"
+                    className="p-2 rounded-2xl bg-sunset hover:underline text-black"
                   >
                     Login Instead
                   </Link>

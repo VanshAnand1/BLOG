@@ -1,4 +1,4 @@
-import { ThemeSwitcher } from "@/components/template/theme-switcher";
+import { ThemeSwitcher } from "@/components/theme-switcher";
 import SearchBar from "@/components/search-bar";
 import Link from "next/link";
 import LogoutButton from "@/components/logout-button";
