@@ -8,7 +8,7 @@ const PostsCard = React.forwardRef<
   <div
     ref={ref}
     className={cn(
-      "rounded-xl px-6 py-1 border dark:bg-aquamarine text-card-foreground shadow max-w-none w-full",
+      "rounded-xl px-6 py-1 border dark:bg-periwinkle bg-sunset text-card-foreground shadow max-w-none w-full",
       className
     )}
     {...props}
@@ -22,7 +22,7 @@ const PostsCardHeader = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("flex flex-col space-y-1.5 dark:text-black", className)}
+    className={cn("flex flex-col space-y-1.5 text-black", className)}
     {...props}
   />
 ));
@@ -69,7 +69,7 @@ const PostsCardDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("text-sm text-muted-foreground dark:text-black", className)}
+    className={cn("text-sm text-muted-foreground text-black", className)}
     {...props}
   />
 ));
@@ -81,7 +81,7 @@ const PostsCardFooter = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("flex items-center py-6 dark:text-black", className)}
+    className={cn("flex items-center py-6 text-black", className)}
     {...props}
   />
 ));
