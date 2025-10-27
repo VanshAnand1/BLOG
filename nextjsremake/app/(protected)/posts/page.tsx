@@ -67,9 +67,9 @@ export default async function Posts() {
                     )}
                     {isAuthor ? (
                       <DeleteOption
-                        postId={post.id}
-                        authorId={post.author_id}
-                        currentUserId={currentUserId}
+                        post_id={post.id}
+                        author_id={post.author_id}
+                        current_user={currentUserId}
                       />
                     ) : null}
                   </div>

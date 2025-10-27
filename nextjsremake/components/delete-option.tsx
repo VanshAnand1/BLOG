@@ -6,22 +6,22 @@ import { Button } from "./ui/button";
 import { createClient } from "@/lib/supabase/client";
 
 type DeleteOptionProps = {
-  postId: string;
-  authorId: string | null | undefined;
-  currentUserId: string;
+  post_id: string;
+  author_id: string | null | undefined;
+  current_user: string;
 };
 
 export default function DeleteOption({
-  postId,
-  authorId,
-  currentUserId,
+  post_id,
+  author_id,
+  current_user,
 }: DeleteOptionProps) {
   const router = useRouter();
   const pathname = usePathname();
   const [isDeleting, setIsDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  if (!currentUserId || !authorId || currentUserId !== authorId) {
+  if (!current_user || !author_id || current_user !== author_id) {
     return null;
   }
 
@@ -35,7 +35,7 @@ export default function DeleteOption({
         data: { user },
       } = await supabase.auth.getUser();
 
-      if (!user || user.id !== authorId) {
+      if (!user || user.id !== author_id) {
         setError("You are not allowed to delete this post.");
         return;
       }
@@ -43,8 +43,8 @@ export default function DeleteOption({
       const { data: deletedRow, error: deleteError } = await supabase
         .from("posts")
         .delete()
-        .eq("id", postId)
-        .eq("author_id", authorId)
+        .eq("id", post_id)
+        .eq("author_id", author_id)
         .select("id")
         .maybeSingle();
 
@@ -58,7 +58,7 @@ export default function DeleteOption({
         return;
       }
 
-      if (pathname === `/posts/${postId}`) {
+      if (pathname === `/posts/${post_id}`) {
         router.push("/posts");
       } else {
         router.refresh();
