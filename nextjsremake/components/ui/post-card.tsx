@@ -1,5 +1,6 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
+import { ThumbsUp } from "lucide-react";
 
 const PostsCard = React.forwardRef<
   HTMLDivElement,
@@ -87,6 +88,42 @@ const PostsCardFooter = React.forwardRef<
 ));
 PostsCardFooter.displayName = "PostsCardFooter";
 
+type PostsCardLikeButtonProps =
+  React.ButtonHTMLAttributes<HTMLButtonElement> & {
+    liked: boolean;
+    likeCount: number;
+  };
+
+const PostsCardLikeButton = React.forwardRef<
+  HTMLButtonElement,
+  PostsCardLikeButtonProps
+>(({ className, liked, likeCount, ...props }, ref) => {
+  const iconColor = liked ? "#388659" : "#4D5061";
+
+  return (
+    <button
+      ref={ref}
+      type="button"
+      aria-pressed={liked}
+      className={cn(
+        "flex items-center gap-1 rounded-full pb-4 text-sm transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
+        className
+      )}
+      {...props}
+    >
+      <ThumbsUp
+        className="h-4 w-4"
+        color={iconColor}
+        fill={liked ? iconColor : "none"}
+      />
+      <span style={{ color: iconColor }}>
+        <p className="font-bold">{likeCount}</p>
+      </span>
+    </button>
+  );
+});
+PostsCardLikeButton.displayName = "PostsCardLikeButton";
+
 export {
   PostsCard,
   PostsCardHeader,
@@ -95,4 +132,5 @@ export {
   PostsCardDescription,
   PostsCardContent,
   PostsCardAuthor,
+  PostsCardLikeButton,
 };

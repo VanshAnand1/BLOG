@@ -7,6 +7,7 @@ import {
   PostsCardContent,
   PostsCardAuthor,
   PostsCardFooter,
+  PostsCardLikeButton,
 } from "@/components/ui/post-card";
 import { PostWithAuthor } from "@/types/posts";
 import Link from "next/link";
@@ -94,6 +95,10 @@ export default async function Posts() {
               ) : (
                 ""
               )}
+              <PostsCardLikeButton
+                liked={true}
+                likeCount={50002312}
+              ></PostsCardLikeButton>
             </PostsCard>
           </article>
         );
