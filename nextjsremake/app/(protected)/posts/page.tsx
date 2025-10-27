@@ -7,13 +7,13 @@ import {
   PostsCardContent,
   PostsCardAuthor,
   PostsCardFooter,
-  PostsCardLikeButton,
 } from "@/components/ui/post-card";
 import { PostWithAuthor } from "@/types/posts";
 import Link from "next/link";
 import Image from "next/image";
 import { datetime } from "@/lib/datetime";
 import PostOptionsMenu from "@/components/post-options-menu";
+import { PostLikeToggleButton } from "@/components/post-like-toggle-button";
 
 export default async function Posts() {
   const supabase = await createClient();
@@ -112,10 +112,12 @@ export default async function Posts() {
               ) : (
                 ""
               )}
-              <PostsCardLikeButton
-                liked={likedByMe}
-                likeCount={post.likes_count}
-              ></PostsCardLikeButton>
+              <PostLikeToggleButton
+                postId={post.id}
+                currentUserId={currentUserId}
+                initialLiked={likedByMe}
+                initialLikeCount={post.likes_count ?? 0}
+              />
             </PostsCard>
           </article>
         );
