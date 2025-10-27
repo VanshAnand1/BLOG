@@ -11,13 +11,14 @@ import {
 import { PostWithAuthor } from "@/types/posts";
 import Link from "next/link";
 import Image from "next/image";
+import { datetime } from "@/lib/datetime";
 
 export default async function Posts() {
   const supabase = await createClient();
   const { data: posts, error } = await supabase
     .from("posts")
     .select(
-      "id, author_id, title, content, created_at, updated_at, author:profiles(display_name, avatar_url)"
+      "id, author_id, title, content, footer, created_at, updated_at, author:profiles(display_name, avatar_url)"
     )
     .order("created_at", { ascending: false })
     .limit(50);
@@ -33,35 +34,56 @@ export default async function Posts() {
   const postsTyped = posts as PostWithAuthor[];
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-6 items-stretch">
       {postsTyped.map((post) => {
         const displayName = post.author?.display_name ?? post.author_id;
         const avatarUrl = post.author?.avatar_url ?? null;
 
         return (
-          <article key={post.id} className="">
+          <article key={post.id} className="mx-auto w-full max-w-6xl">
             <PostsCard>
               <PostsCardHeader>
+                <div className="flex justify-between mt-2 items-center">
+                  <Link href={`/posts/${post.id}`} className="text-2xl pt-3">
+                    <PostsCardTitle>{post.title}</PostsCardTitle>
+                  </Link>
+                  <div>
+                    {datetime(post.created_at)}
+                    {"  "}
+                    {post.updated_at ? (
+                      <span className="">
+                        (edited {datetime(post.updated_at)})
+                      </span>
+                    ) : (
+                      ""
+                    )}
+                  </div>
+                </div>
                 <Link href={`/profiles/$${post.author_id}`}>
                   <PostsCardAuthor>
-                    {avatarUrl ? (
-                      <Image
-                        src={avatarUrl}
-                        alt={displayName ?? "avatar"}
-                        className="w-6 h-6 rounded-full inline-block mr-2"
-                      />
-                    ) : null}
-                    {displayName}
+                    <div className="flex gap-3">
+                      {avatarUrl ? (
+                        <Image
+                          src={avatarUrl}
+                          alt={displayName ?? "avatar"}
+                          className="w-6 h-6 rounded-full inline-block mr-2"
+                        />
+                      ) : null}
+                      @{displayName}
+                    </div>
                   </PostsCardAuthor>
-                </Link>
-                <Link href={`/posts/${post.id}`}>
-                  <PostsCardTitle>{post.title}</PostsCardTitle>
                 </Link>
               </PostsCardHeader>
               <PostsCardContent>
-                <PostsCardDescription>{post.content}</PostsCardDescription>
+                <PostsCardDescription className="text-md">
+                  {post.content}
+                </PostsCardDescription>
               </PostsCardContent>
-              <PostsCardFooter>Footer</PostsCardFooter>
+              {post.footer ? (
+                <PostsCardFooter>TLDR: {post.footer}</PostsCardFooter>
+              ) : (
+                ""
+              )}
             </PostsCard>
           </article>
         );
