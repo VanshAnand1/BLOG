@@ -65,7 +65,7 @@ export function LoginForm() {
                   id="email"
                   type="email"
                   placeholder="email@example.com"
-                  className="placeholder:text-lightgray border-black dark:text-black"
+                  className="placeholder:text-lightgray border-black text-black"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -74,7 +74,7 @@ export function LoginForm() {
 
               <div className="grid gap-2">
                 <div className="flex items-center">
-                  <Label htmlFor="password" className="dark:text-black">
+                  <Label htmlFor="password" className="text-black">
                     Password
                   </Label>
                   <Link
@@ -88,7 +88,7 @@ export function LoginForm() {
                   id="password"
                   type="password"
                   placeholder="**********"
-                  className="placeholder:text-lightgray border-black dark:text-black"
+                  className="placeholder:text-lightgray border-black text-black"
                   required
                   value={password}
                   onChange={(e) => {
@@ -106,7 +106,7 @@ export function LoginForm() {
                 Don&apos;t have an account?{" "}
                 <Link
                   href="/auth/sign-up"
-                  className="p-2 rounded-2xl bg-sunset dark:text-black hover:underline"
+                  className="p-2 rounded-2xl bg-sunset text-black hover:underline"
                 >
                   Sign Up Instead
                 </Link>

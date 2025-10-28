@@ -44,19 +44,20 @@ export function UpdatePasswordForm() {
           <CardTitle className="text-2xl text-black">
             Reset Your Password
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-black">
             Please enter your new password below.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleForgotPassword}>
             <div className="flex flex-col gap-6">
-              <div className="grid gap-2">
+              <div className="grid gap-2 text-black">
                 <Label htmlFor="password">New password</Label>
                 <Input
                   id="password"
                   type="password"
                   placeholder="New password"
+                  className="placeholder:text-lightgray text-black border-black"
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}

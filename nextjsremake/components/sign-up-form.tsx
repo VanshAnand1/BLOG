@@ -93,7 +93,7 @@ export function SignUpForm() {
                   id="email"
                   type="email"
                   placeholder="email@example.com"
-                  className="placeholder:text-lightgray border-black"
+                  className="placeholder:text-lightgray text-black border-black"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -107,7 +107,7 @@ export function SignUpForm() {
                   id="displayName"
                   type="text"
                   placeholder="Display Name"
-                  className="placeholder:text-lightgray border-black"
+                  className="placeholder:text-lightgray text-black border-black"
                   required
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
@@ -121,7 +121,7 @@ export function SignUpForm() {
                   id="password"
                   type="password"
                   placeholder="**********"
-                  className="placeholder:text-lightgray border-black"
+                  className="placeholder:text-lightgray text-black border-black"
                   required
                   value={password}
                   onChange={(e) => {
@@ -137,7 +137,7 @@ export function SignUpForm() {
                   id="confirmPassword"
                   type="password"
                   placeholder="**********"
-                  className="placeholder:text-lightgray border-black"
+                  className="placeholder:text-lightgray text-black border-black"
                   required
                   value={confirmPassword}
                   onChange={(e) => {

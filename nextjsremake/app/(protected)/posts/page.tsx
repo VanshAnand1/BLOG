@@ -88,7 +88,7 @@ export default async function Posts() {
                   </div>
                 </div>
                 <Link href={`/profiles/$${post.author_id}`}>
-                  <PostsCardAuthor>
+                  <PostsCardAuthor className="flex gap-2">
                     <div className="flex gap-3">
                       {avatarUrl ? (
                         <Image
@@ -97,8 +97,11 @@ export default async function Posts() {
                           className="w-6 h-6 rounded-full inline-block mr-2"
                         />
                       ) : null}
-                      @{displayName}
+                      @{displayName}{" "}
                     </div>
+                    <p className="text-lightgray">
+                      {post.author_id === user?.id ? "(you)" : ""}
+                    </p>
                   </PostsCardAuthor>
                 </Link>
               </PostsCardHeader>
