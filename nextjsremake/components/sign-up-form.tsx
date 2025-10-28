@@ -35,12 +35,32 @@ export function SignUpForm() {
     return true;
   };
 
+  const usernameIsUnique = async () => {
+    const supabase = createClient();
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("display_name")
+      .eq("display_name", username);
+
+    if (error) return false;
+    return data?.length === 0;
+  };
+
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     const supabase = createClient();
     setIsLoading(true);
     setError(null);
-    if (!checkPasswordsMatch()) return;
+    if (!checkPasswordsMatch()) {
+      setError("passwords do not match");
+      setIsLoading(false);
+      return;
+    }
+    if (!(await usernameIsUnique())) {
+      setError("username is already in use");
+      setIsLoading(false);
+      return;
+    }
 
     try {
       const { error } = await supabase.auth.signUp({
