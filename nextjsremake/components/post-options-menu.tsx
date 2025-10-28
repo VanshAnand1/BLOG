@@ -22,16 +22,13 @@ export default function PostOptionsMenu({
   authorId,
   currentUserId,
 }: PostOptionsMenuProps) {
+  const isOwner = Boolean(currentUserId && authorId && currentUserId === authorId);
   const { deletePost, isDeleting, error } = useDeletePost({
     postId,
     authorId,
     currentUserId,
   });
   const [isCopied, setIsCopied] = useState(false);
-
-  if (!currentUserId || !authorId || currentUserId !== authorId) {
-    return null;
-  }
 
   return (
     <div className="flex items-center gap-2">
@@ -62,21 +59,25 @@ export default function PostOptionsMenu({
           >
             {isCopied ? "Copied Link!" : "Share Post"}
           </DropdownMenuItem>
-          <DropdownMenuItem
-            onSelect={(event) => {
-              if (isDeleting) {
-                event.preventDefault();
-                return;
-              }
-              deletePost();
-            }}
-            disabled={isDeleting}
-          >
-            {isDeleting ? "Deleting..." : "Delete"}
-          </DropdownMenuItem>
+          {isOwner ? (
+            <DropdownMenuItem
+              onSelect={(event) => {
+                if (isDeleting) {
+                  event.preventDefault();
+                  return;
+                }
+                deletePost();
+              }}
+              disabled={isDeleting}
+            >
+              {isDeleting ? "Deleting..." : "Delete"}
+            </DropdownMenuItem>
+          ) : null}
         </DropdownMenuContent>
       </DropdownMenu>
-      {error ? <span className="text-xs text-red-500">{error}</span> : null}
+      {error && isOwner ? (
+        <span className="text-xs text-red-500">{error}</span>
+      ) : null}
     </div>
   );
 }
