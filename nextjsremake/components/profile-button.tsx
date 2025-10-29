@@ -57,7 +57,7 @@ export default function ProfileButton() {
   return (
     <Button
       onClick={handleProfileClick}
-      className="dark:bg-teagreen/80 dark:text-black rounded-2xl py-2 px-4 font-bold text-white dark:hover:bg-teagreen bg-navy/80 hover:bg-navy/60"
+      className="dark:bg-teagreen/80 text-md dark:text-black rounded-2xl py-2 px-4 font-bold text-white dark:hover:bg-teagreen bg-navy/80 hover:bg-navy/60"
     >
       Profile: {username}
     </Button>
