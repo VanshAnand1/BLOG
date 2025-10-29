@@ -15,6 +15,7 @@ import { PostWithAuthor } from "@/types/posts";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
+import MiniListPosts from "@/components/mini-list-posts";
 
 export default async function SinglePost({
   params,
@@ -117,8 +118,12 @@ export default async function SinglePost({
           />
         </PostsCard>
       </article>
-      <p>Hi</p>
-      <article></article>
+      <div>
+        <h1 className="text-center bg-periwinkle rounded-xl text-black">
+          {displayName}s Recent Posts
+        </h1>
+        <MiniListPosts authorId={post.author_id} />
+      </div>
     </div>
   );
 }
